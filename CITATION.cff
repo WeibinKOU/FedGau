@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: KOU 
+    given-names: Weibin 
+    orcid: https://orcid.org/0000-0001-9817-791X
+title: "Multi-stage Federated Learning Framework tested by our proposed crack detection CrackNet"
+version: 1.0.0
+doi:
+date-released: 2023-01-11
