@@ -99,6 +99,8 @@ def main():
         model_sel['model'] = SegNet
     elif args.model == 'DeepLabv3':
         model_sel['model'] = DeepLabv3
+    elif args.model == 'ResNet18':
+        model_sel['model'] = ResNet18
 
     dev = torch.device('cuda:%d' % (args.gpu) if torch.cuda.is_available() else 'cpu')
 
