@@ -16,4 +16,8 @@ model/.resnet.py.swp
 model/.resnet.py.un~
 model/resnet.py~
 .fed_train.py.un~
-fed_train.py~
+fed_train.py
+datasets/
+MultiFL/.temp_map_out/
+.temp_map_out/
+logs/

@@ -108,7 +108,7 @@ class ASSP(nn.Module):
         return x
 
 class DeepLabv3(nn.Module):
-    def __init__(self, n_classes, aux_mode = 'train'):
+    def __init__(self, n_classes = 2, aux_mode = 'train'):
         super(DeepLabv3, self).__init__()
         self.nc = n_classes 
         self.aux_mode = aux_mode
@@ -117,7 +117,7 @@ class DeepLabv3(nn.Module):
         self.conv = nn.Conv2d(in_channels = 256, out_channels = self.nc,
                           kernel_size = 1, stride=1, padding=0)
 
-    def forward(self, x, x_inv):
+    def forward(self, x):
         _, _, h, w = x.shape
         x = self.resnet(x)
         x = self.assp(x)

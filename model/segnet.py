@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 
 class SegNet(nn.Module):
-    def __init__(self, n_classes, aux_mode = 'train'):
+    def __init__(self, n_classes = 2, aux_mode = 'train'):
         super(SegNet, self).__init__()
 
         self.in_chn = 3 
@@ -83,7 +83,7 @@ class SegNet(nn.Module):
         self.ConvDe11 = nn.Conv2d(64, self.out_chn, kernel_size=3, padding=1)
         self.BNDe11 = nn.BatchNorm2d(self.out_chn, momentum=BN_momentum)
 
-    def forward(self, x, x_inv):
+    def forward(self, x):
 
         #ENCODE LAYERS
         #Stage 1

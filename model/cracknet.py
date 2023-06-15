@@ -291,7 +291,7 @@ class SegmentHead(nn.Module):
 
 class CrackNet(nn.Module):
 
-    def __init__(self, n_classes, aux_mode='train'):
+    def __init__(self, n_classes = 2, aux_mode='train'):
         super(CrackNet, self).__init__()
         self.aux_mode = aux_mode
         self.detail = DetailBranch()
@@ -306,10 +306,10 @@ class CrackNet(nn.Module):
             self.aux4 = SegmentHead(64, 128, n_classes, up_factor=16)
             self.aux5_4 = SegmentHead(128, 128, n_classes, up_factor=32)
 
-    def forward(self, x, x_inv):
+    def forward(self, x):
         size = x.size()[2:]
-        feat_d = self.detail(x_inv)
-        feat2, feat3, feat4, feat5_4, feat_s = self.segment(x_inv)
+        feat_d = self.detail(x)
+        feat2, feat3, feat4, feat5_4, feat_s = self.segment(x)
         feat_head = self.bga(feat_d, feat_s)
 
         logits = self.head(feat_head)
