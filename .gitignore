@@ -21,3 +21,4 @@ datasets/
 MultiFL/.temp_map_out/
 .temp_map_out/
 logs/
+model/fasterrcnn/model_data/resnet50-19c8e357.pth
