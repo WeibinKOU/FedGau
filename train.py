@@ -44,7 +44,7 @@ if torch.cuda.is_available():
 
 def build_parser():
     # Training settings
-    parser = argparse.ArgumentParser(description='Palm Detector')
+    parser = argparse.ArgumentParser(description='Semantic Segmentation')
     parser.add_argument('--epochs', type=int, default=500, metavar='N',
                         help='number of epochs for training (default: 3000)')
     parser.add_argument('--gpu', type=int, default=0, help='choose which GPU to use')
@@ -55,8 +55,8 @@ def build_parser():
     parser.add_argument('--img-size', type=str, default='320,320', help='the uniform size of the resized images')
     parser.add_argument('--save-epoch', type=int, default=10, metavar='N',
                         help='num of epochs saving the model (default: 10)')
-    parser.add_argument("--model", type=str, default='CrackNet', help="To specify which model to be trained, options: [CrackNet, BiSeNetV2, SegNet, DeepLabv3]")
-    parser.add_argument("--dataset-path", type=str, default='../datasets/3_Ren/', help="To specify training dataset path")
+    parser.add_argument("--model", type=str, default='DeepLabv3', help="To specify which model to be trained, options: [CrackNet, BiSeNetV2, SegNet, DeepLabv3]")
+    parser.add_argument("--dataset-path", type=str, default='./datasets/cityspace/centralized/', help="To specify training dataset path")
     args = parser.parse_args()
     return args
 
