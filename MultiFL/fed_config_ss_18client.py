@@ -10,103 +10,241 @@ import torch.nn.functional as F
 
 from utils.func import *
 
-WIDTH=640
-HEIGHT=1280
+WIDTH=320
+HEIGHT=320
 
 task = 'semSeg' #alternatives: semSeg, objDect, classification
 semSeg = {
         'Edge0' : #Northern Germany
         {
-            'agg_coef': 0.274,
+            'agg_coef': 0.255,
             'Agent0' :
             {
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client4/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/hamburg/',
                 'lr': 0.003,
-                'batch_size': 8,
+                'batch_size': 4,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.383,
+                'agg_coef': 0.416,
             },
 
             'Agent1' :
             {
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client6/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/hanover/',
                 'lr': 0.003,
-                'batch_size': 8,
+                'batch_size': 4,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.293,
+                'agg_coef': 0.326,
             },
 
             'Agent2' :
             {
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client7/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/bremen/',
                 'lr': 0.003,
-                'batch_size': 8,
+                'batch_size': 4,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.324,
+                'agg_coef': 0.258,
             },
         },
 
         'Edge1': # Rhine-Ruhr Region
         {
-            'agg_coef': 0.352,
+            'agg_coef': 0.097,
             'Agent0' :
             {
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client1/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/bochum/',
                 'lr': 0.003,
-                'batch_size': 8,
+                'batch_size': 4,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.560,
+                'agg_coef': 0.332,
             },
 
             'Agent1' :
             {
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client2/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/krefeld/',
                 'lr': 0.003,
-                'batch_size': 8,
+                'batch_size': 4,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.440,
+                'agg_coef': 0.343,
+            },
+
+            'Agent2' :
+            {
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/monchengladbach/',
+                'lr': 0.003,
+                'batch_size': 4,
+                'betas': (0.9, 0.999),
+                'weight_decay': 1e-4,
+                'agg_coef': 0.325,
             },
         },
 
         'Edge2': #Western Germany - Cental
         {
-            'agg_coef': 0.374,
+            'agg_coef': 0.126,
             'Agent0' :
             {
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client3/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/cologne/',
                 'lr': 0.003,
-                'batch_size': 8,
-               'betas': (0.9, 0.999),
+                'batch_size': 4,
+                'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.496,
+                'agg_coef': 0.411,
             },
 
             'Agent1' :
             {
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client5/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/dusseldorf/',
                 'lr': 0.003,
-                'batch_size': 8,
+                'batch_size': 4,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.504,
+                'agg_coef': 0.589,
             }
+        },
+
+        'Edge3': # Sourthern Germany - East
+        {
+            'agg_coef': 0.080,
+            'Agent0' :
+            {
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/ulm/',
+                'lr': 0.003,
+                'batch_size': 4,
+                'betas': (0.9, 0.999),
+                'weight_decay': 1e-4,
+                'agg_coef': 0.603,
+            },
+
+            'Agent1' :
+            {
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/tubingen/',
+                'lr': 0.003,
+                'batch_size': 4,
+                'betas': (0.9, 0.999),
+                'weight_decay': 1e-4,
+                'agg_coef': 0.397,
+            }
+        },
+
+        'Edge4': # Central Germany - East
+        {
+            'agg_coef': 0.124,
+            'Agent0' :
+            {
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/erfurt/',
+                'lr': 0.003,
+                'batch_size': 4,
+                'betas': (0.9, 0.999),
+                'weight_decay': 1e-4,
+                'agg_coef': 0.295,
+            },
+
+            'Agent1' :
+            {
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/jena/',
+                'lr': 0.003,
+                'batch_size': 4,
+                'betas': (0.9, 0.999),
+                'weight_decay': 1e-4,
+                'agg_coef': 0.322,
+            },
+
+            'Agent2' :
+            {
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/weimar/',
+                'lr': 0.003,
+                'batch_size': 4,
+                'betas': (0.9, 0.999),
+                'weight_decay': 1e-4,
+                'agg_coef': 0.384,
+            },
+        },
+
+        'Edge5': # Zurich
+        {
+            'agg_coef': 0.041,
+            'Agent0' :
+            {
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/zurich/',
+                'lr': 0.003,
+                'batch_size': 4,
+                'betas': (0.9, 0.999),
+                'weight_decay': 1e-4,
+                'agg_coef': 1.0,
+            },
+        },
+
+        'Edge6': # Sourthern Germany - West
+        {
+            'agg_coef': 0.066,
+            'Agent0' :
+            {
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/stuttgart/',
+                'lr': 0.003,
+                'batch_size': 4,
+                'betas': (0.9, 0.999),
+                'weight_decay': 1e-4,
+                'agg_coef': 1.0,
+            },
+        },
+
+        'Edge7': # Western Germany - North
+        {
+            'agg_coef': 0.058,
+            'Agent0' :
+            {
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/aachen/',
+                'lr': 0.003,
+                'batch_size': 4,
+                'betas': (0.9, 0.999),
+                'weight_decay': 1e-4,
+                'agg_coef': 1.0,
+            },
+        },
+
+        'Edge8': # Central Germany - West
+        {
+            'agg_coef': 0.029,
+            'Agent0' :
+            {
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/darmstadt/',
+                'lr': 0.003,
+                'batch_size': 4,
+                'betas': (0.9, 0.999),
+                'weight_decay': 1e-4,
+                'agg_coef': 1.0,
+            },
+        },
+
+        'Edge9': # France
+        {
+            'agg_coef': 0.123,
+            'Agent0' :
+            {
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/strasbourg/',
+                'lr': 0.003,
+                'batch_size': 4,
+                'betas': (0.9, 0.999),
+                'weight_decay': 1e-4,
+                'agg_coef': 1.0,
+            },
         },
 
         'test':
         {
             'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/test/',
-            'batch_size': 8,
+            'batch_size': 4,
         },
 
         'model': DeepLabv3,
         'global_round': 50,
-        'EAI': 3,
-        'CAI': 2,
+        'EAI': 1,
+        'CAI': 1,
         'GPU_ID': 0,
         'logdir': '/home/wbkou/AAAI/HFL-DynaCoeffi/logs'
 }
@@ -115,8 +253,7 @@ semSeg = {
 objDect = {
         'Edge0' :
         {
-            #'agg_coef': 0.175, #size ratio
-            'agg_coef': 0.135, #bd
+            'agg_coef': 0.175,
             'Agent0' :
             {
                 #'train_anno_path' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/VOCdevkit/repack/2007_train_1.txt',
@@ -125,8 +262,7 @@ objDect = {
                 'lr': 0.003,
                 'betas': (0.9, 0.999),
                 'weight_decay': 0,
-                #'agg_coef': 0.138, #size ratio
-                'agg_coef': 0.008, #bd
+                'agg_coef': 0.138,
             },
 
             'Agent1' :
@@ -137,15 +273,13 @@ objDect = {
                 'lr': 0.003,
                 'betas': (0.9, 0.999),
                 'weight_decay': 0,
-                #'agg_coef': 0.862,#size ratio
-                'agg_coef': 0.992,#bd
+                'agg_coef': 0.862,
             }
         },
 
         'Edge1':
         {
-            #'agg_coef': 0.394,#size ratio
-            'agg_coef': 0.393,#bd
+            'agg_coef': 0.394,
             'Agent0' :
             {
                 #'train_anno_path' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/VOCdevkit/repack/2007_train_3.txt',
@@ -154,8 +288,7 @@ objDect = {
                 'lr': 0.003,
                 'betas': (0.9, 0.999),
                 'weight_decay': 0,
-                #'agg_coef': 0.075,#size ratio
-                'agg_coef': 0.066,#bd
+                'agg_coef': 0.075,
             },
 
             'Agent1' :
@@ -166,8 +299,7 @@ objDect = {
                 'lr': 0.003,
                 'betas': (0.9, 0.999),
                 'weight_decay': 0,
-                #'agg_coef': 0.446,#size ratio
-                'agg_coef': 0.421,#bd
+                'agg_coef': 0.446,
             },
 
             'Agent2' :
@@ -178,15 +310,13 @@ objDect = {
                 'lr': 0.003,
                 'betas': (0.9, 0.999),
                 'weight_decay': 0,
-                #'agg_coef': 0.479,#size ratio
-                'agg_coef': 0.513,#bd
+                'agg_coef': 0.479,
             }
         },
 
         'Edge2':
         {
-            #'agg_coef': 0.431,#size ratio
-            'agg_coef': 0.472,#size ratio
+            'agg_coef': 0.431,
             'Agent0' :
             {
                 #'train_anno_path' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/VOCdevkit/repack/2007_train_6.txt',
@@ -195,8 +325,7 @@ objDect = {
                 'lr': 0.003,
                 'betas': (0.9, 0.999),
                 'weight_decay': 0,
-                #'agg_coef': 0.529,#size ratio
-                'agg_coef': 0.577,#bd
+                'agg_coef': 0.529,
             },
 
             'Agent1' :
@@ -207,8 +336,7 @@ objDect = {
                 'lr': 0.003,
                 'betas': (0.9, 0.999),
                 'weight_decay': 0,
-                #'agg_coef': 0.471,#size ratio
-                'agg_coef': 0.423,#bd
+                'agg_coef': 0.471,
             }
         },
 

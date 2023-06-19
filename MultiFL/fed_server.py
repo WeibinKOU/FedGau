@@ -84,13 +84,25 @@ class EdgeServer():
                                          batch_size=self.config['test']['batch_size'],
                                          shuffle=True,
                                          num_workers=1)
-            avg_iou, avg_pre, avg_recall, avg_f1 = SS_Evaluate(self.model, test_dataloader, self.dev)
-            self.tb.add_scalar('%s.Eval.AvgIOU' % self.id, avg_iou, self.fed_cnt)
-            self.tb.add_scalar('%s.Eval.AvgPrecision' % self.id, avg_pre, self.fed_cnt)
-            self.tb.add_scalar('%s.Eval.AvgRecall' % self.id, avg_recall, self.fed_cnt)
-            self.tb.add_scalar('%s.Eval.AvgF1' % self.id, avg_f1, self.fed_cnt)
-            log_info = "[Edge FL: %d] [%s.FL.Eval.AvgIOU: %f, %s.FL.Eval.AvgPrecision: %f, %s.FL.Eval.AvgRecall: %f, %s.FL.Eval.AvgF1: %f]" % (self.fed_cnt, self.id, avg_iou, self.id, avg_pre, self.id, avg_recall, self.id, avg_f1)
-            print(log_info)
+
+            #dicts= SS_Evaluate(self.model, test_dataloader, self.dev)
+            #for k, v in dicts.items():
+            #    if k == 'mIoU':
+            #        self.tb.add_scalar('%s.Eval.mIOU' % self.id, v, self.fed_cnt)
+            #    elif k == 'mPrecision':
+            #        self.tb.add_scalar('%s.Eval.mPrecision' % self.id, v, self.fed_cnt)
+            #    elif k == 'mRecall':
+            #        self.tb.add_scalar('%s.Eval.mRecall' % self.id, v, self.fed_cnt)
+            #    elif k == 'mF1':
+            #        self.tb.add_scalar('%s.Eval.mF1' % self.id, v, self.fed_cnt)
+            #    else:
+            #        self.tb.add_scalar(self.id + '.Eval.' + k + '.IoU', v['IoU'], self.fed_cnt)
+            #        self.tb.add_scalar(self.id + '.Eval.' + k + '.Precision', v['Precision'], self.fed_cnt)
+            #        self.tb.add_scalar(self.id + '.Eval.' + k + '.Recall', v['Recall'], self.fed_cnt)
+            #        self.tb.add_scalar(self.id + '.Eval.' + k + '.F1', v['F1'], self.fed_cnt)
+
+            #log_info = "[Edge FL: %d] [%s.FL.Eval.mIOU: %f, %s.FL.Eval.mPrecision: %f, %s.FL.Eval.mRecall: %f, %s.FL.Eval.mF1: %f]" % (self.fed_cnt, self.id, dicts['mIoU'], self.id, dicts['mPrecision'], self.id, dicts['mRecall'], self.id, dicts['mF1'])
+            #print(log_info)
         elif self.task == 'objDect':
             num_val = 0
             val_lines = None
@@ -227,12 +239,24 @@ class CloudServer():
                                              batch_size=self.config['test']['batch_size'],
                                              shuffle=True,
                                              num_workers=1)
-            avg_iou, avg_pre, avg_recall, avg_f1 = SS_Evaluate(self.model, test_dataloader, self.dev)
-            self.tb.add_scalar('Cloud.FL.Eval.AvgIOU', avg_iou, self.fed_cnt)
-            self.tb.add_scalar('Cloud.FL.Eval.AvgPrecision', avg_pre, self.fed_cnt)
-            self.tb.add_scalar('Cloud.FL.Eval.AvgRecall', avg_recall, self.fed_cnt)
-            self.tb.add_scalar('Cloud.FL.Eval.AvgF1', avg_f1, self.fed_cnt)
-            log_info = "[Cloud FL: %d] [Cloud.FL.Eval.AvgIOU: %f, Cloud.FL.Eval.AvgPrecision: %f, Cloud.FL.Eval.AvgRecall: %f, Cloud.FL.Eval.AvgF1: %f]" % (self.fed_cnt, avg_iou, avg_pre, avg_recall, avg_f1)
+
+            dicts= SS_Evaluate(self.model, test_dataloader, self.dev)
+            for k, v in dicts.items():
+                if k == 'mIoU':
+                    self.tb.add_scalar('Cloud.Eval.mIOU', v, self.fed_cnt)
+                elif k == 'mPrecision':
+                    self.tb.add_scalar('Cloud.Eval.mPrecision', v, self.fed_cnt)
+                elif k == 'mRecall':
+                    self.tb.add_scalar('Cloud.Eval.mRecall', v, self.fed_cnt)
+                elif k == 'mF1':
+                    self.tb.add_scalar('Cloud.Eval.mF1', v, self.fed_cnt)
+                else:
+                    self.tb.add_scalar('Cloud.Eval.' + k + '.IoU', v['IoU'], self.fed_cnt)
+                    self.tb.add_scalar('Cloud.Eval.' + k + '.Precision', v['Precision'], self.fed_cnt)
+                    self.tb.add_scalar('Cloud.Eval.' + k + '.Recall', v['Recall'], self.fed_cnt)
+                    self.tb.add_scalar('Cloud.Eval.' + k + '.F1', v['F1'], self.fed_cnt)
+
+            log_info = "[Cloud FL: %d] [Cloud.FL.Eval.AvgIOU: %f, Cloud.FL.Eval.AvgPrecision: %f, Cloud.FL.Eval.AvgRecall: %f, Cloud.FL.Eval.AvgF1: %f]" % (self.fed_cnt, dicts['mIoU'], dicts['mPrecision'], dicts['mRecall'], dicts['mF1'])
             print(log_info)
         elif self.task == 'objDect':
             num_val = 0

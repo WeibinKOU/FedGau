@@ -108,7 +108,7 @@ class ASSP(nn.Module):
         return x
 
 class DeepLabv3(nn.Module):
-    def __init__(self, n_classes = 2, aux_mode = 'train'):
+    def __init__(self, n_classes = 19, aux_mode = 'train'):
         super(DeepLabv3, self).__init__()
         self.nc = n_classes 
         self.aux_mode = aux_mode

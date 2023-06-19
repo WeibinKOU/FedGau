@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
+import torch.backends.cudnn as cudnn
 import copy
 from tqdm import tqdm
 from termcolor import colored
@@ -31,6 +32,11 @@ class SemSegClient():
         self.time_str = time_str 
 
         self.model = self.config['model']().to(self.dev)
+        self.model_train     = self.model.train()
+        if torch.cuda.is_available():
+            self.model_train = torch.nn.DataParallel(self.model_train)
+            cudnn.benchmark = True
+            self.model_train = self.model_train.cuda()
 
         self.batch_size = self.config[self.eid][self.cid]['batch_size']
         self.lr = self.config[self.eid][self.cid]['lr']
@@ -46,12 +52,12 @@ class SemSegClient():
         self.dataloader = DataLoader(self.dataset,
             batch_size=self.batch_size,
             shuffle=True,
-            num_workers=1)
+            num_workers=1, drop_last=True)
         self.test_dataset = Dataset(self.config['test']['dataset'], type_='test')
         self.test_dataloader = DataLoader(self.test_dataset,
                                      batch_size=self.config['test']['batch_size'],
                                      shuffle=True,
-                                     num_workers=1)
+                                     num_workers=1, drop_last=True)
 
         self.optim = torch.optim.Adam(self.model.parameters(),
                                       lr=self.lr,
@@ -69,7 +75,7 @@ class SemSegClient():
 
             loss = AverageMeter()
             for imgs, masks, names in tqdm(self.dataloader):
-                *logits, = self.model(imgs.to(self.dev))
+                *logits, = self.model_train(imgs.to(self.dev))
                 pred_masks = [F.softmax(logit, dim=1) for logit in logits]
                 dist = [self.criterion(pred_mask, masks.to(self.dev)) for pred_mask in pred_masks]
                 dist = sum(dist)

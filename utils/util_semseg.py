@@ -3,6 +3,7 @@ from sklearn.metrics import precision_score as precision
 from sklearn.metrics import recall_score as recall
 from sklearn.metrics import f1_score as f1
 from utils.utils_cla import progress_bar
+import numpy as np
 import torch
 import torch.nn as nn
 from tqdm import tqdm
@@ -16,46 +17,79 @@ from utils.utils_map import get_map
 from utils.callbacks import EvalCallback
 from utils.utils import get_classes
 
-def SS_calc_IoU(gt_mask, pred_mask):
+def SS_calc_metric(gt_mask, pred_mask):
+    t = pred_mask
+    t[t >= 0.3] = 1.0
+    t[t < 0.3] = 0.0
+    pred_mask = t
+    gt_mask = gt_mask.astype(int).flatten()
+    pred_mask = pred_mask.astype(int).flatten()
+    gt_mask[gt_mask == 255] = 0
 
-    iou = jaccard(gt_mask.flatten(), pred_mask.flatten())
-    prec = precision(gt_mask.flatten(), pred_mask.flatten())
-    reca = recall(gt_mask.flatten(), pred_mask.flatten())
-    f_one = f1(gt_mask.flatten(), pred_mask.flatten())
+    intersection = np.sum(gt_mask * pred_mask)
 
-    return iou.item(), prec.item(), reca.item(), f_one.item()
+    iou = intersection / (np.sum(gt_mask + pred_mask) + 1e-8)
+    prec = intersection / (np.sum(pred_mask) + 1e-8)
+    reca = intersection / (np.sum(gt_mask) + 1e-8)
+    f_one = 2 * prec * reca / (prec + reca + 1e-8)
+
+    return iou, prec, reca, f_one
 
 def SS_Evaluate(model, dataloader, dev):
     model.eval()
     model.aux_mode = 'test'
+    cla_names = ['road', 'sidewalk', 'building', 'wall', 'fence', 'pole', 'trafficlight', 'trafficsign', 'vegetation', 'terrain', 'sky', 'person', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle']
 
     with torch.no_grad():
         iou = []
         precision = []
         recall = []
         f1 = []
-        for imgs, imgs_inv, masks, names in tqdm(dataloader):
-            pred_masks = F.softmax(model(imgs.to(dev), imgs_inv.to(dev)), dim=1)[:, 0, :, :]
-            t = pred_masks
-            t[t >= 0.3] = 1.0
-            t[t < 0.3] = 0.0
-            pred_masks = t
-            masks = masks.squeeze().numpy().astype(int)
-            pred_masks = pred_masks.squeeze().detach().cpu().numpy().astype(int)
-            for i in range(masks.shape[0]):
-                iou_t, pre_t, rec_t, f1_t = SS_calc_IoU(masks[i], pred_masks[i])
-                iou.append(iou_t)
-                precision.append(pre_t)
-                recall.append(rec_t)
-                f1.append(f1_t)
+        res_dict = {}
+        for imgs, masks, names in tqdm(dataloader):
+            pred_masks = F.softmax(model(imgs.to(dev)), dim=1)
+            masks = masks.squeeze().numpy()
+            pred_masks = pred_masks.squeeze().detach().cpu().numpy()
+
+            for j in range(masks.shape[1]):
+                cla_dict = {}
+                cla_iou = []
+                cla_precision = []
+                cla_recall = []
+                cla_f1 = []
+                for i in range(masks.shape[0]):
+                    iou_t, pre_t, rec_t, f1_t = SS_calc_metric(masks[i,j], pred_masks[i,j])
+                    cla_iou.append(iou_t)
+                    cla_precision.append(pre_t)
+                    cla_recall.append(rec_t)
+                    cla_f1.append(f1_t)
+                cla_avg_iou = sum(cla_iou) / len(cla_iou)
+                cla_avg_pre = sum(cla_precision) / len(cla_precision)
+                cla_avg_recall = sum(cla_recall) / len(cla_recall)
+                cla_avg_f1 = sum(cla_f1) / len(cla_f1)
+
+                cla_dict['IoU'] = cla_avg_iou
+                cla_dict['Precision'] = cla_avg_pre
+                cla_dict['Recall'] = cla_avg_recall
+                cla_dict['F1'] = cla_avg_f1
+                res_dict[cla_names[j]] = cla_dict
+
+            iou.append(cla_avg_iou)
+            precision.append(cla_avg_pre)
+            recall.append(cla_avg_recall)
+            f1.append(cla_avg_f1)
+
         avg_iou = sum(iou) / len(iou)
         avg_pre = sum(precision) / len(precision)
         avg_recall = sum(recall) / len(recall)
         avg_f1 = sum(f1) / len(f1)
+
+        res_dict['mIoU'] = avg_iou
+        res_dict['mPrecision'] = avg_pre
+        res_dict['mRecall'] = avg_recall
+        res_dict['mF1'] = avg_f1
     model.train()
-    return avg_iou, avg_pre, avg_recall, avg_f1 
-
-
+    return res_dict
 
 def classi_Evaluate(model, testloader, dev):
     criterion = nn.CrossEntropyLoss()
