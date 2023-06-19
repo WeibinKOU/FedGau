@@ -17,7 +17,7 @@ from MultiFL.fed_config import WIDTH, HEIGHT
 
 class Dataset(Dataset):
 
-    def __init__(self, data_dir, num_classes=30, type_='train'): #type: [train, test]
+    def __init__(self, data_dir, num_classes=19, type_='train'): #type: [train, test]
         super().__init__()
 
         self.data_dir = data_dir
@@ -60,8 +60,9 @@ class Dataset(Dataset):
     def mask_to_layers(self, mask, num_classes):
         layers = []
         for i in range(num_classes):
-            layer = np.zeros_like(mask)
+            layer = 255.0 * np.ones_like(mask)
             layer[mask == i] = 1.0
+            layer = torch.Tensor(layer[np.newaxis,...])
             layers.append(layer)
         return layers
 
@@ -74,10 +75,17 @@ class Dataset(Dataset):
 
         img = cv2.imread(os.path.join(self.img_dir, name), cv2.IMREAD_COLOR)[..., ::-1]
         mask = cv2.imread(os.path.join(self.mask_dir, mask_name), cv2.IMREAD_GRAYSCALE)
-        mask_layers = self.mask_to_layers(mask, self.num_classes)
+
+        if self.type_ == 'train':
+            mask = np.expand_dims(mask, axis=2)
+            comb = np.concatenate((img, mask), axis=2)
+            new_comb = self.transform(image=comb)
+            img = new_comb[:,:,:3]
+            mask = new_comb[:,:,3:]
 
         img_tensor = self.img_to_tensor(img)
-        mask_tensor = torch.Tensor(mask_layers)
+        mask_layers = self.mask_to_layers(mask, self.num_classes)
+        mask_tensor = torch.cat(mask_layers, dim=0).squeeze()
 
         return img_tensor, mask_tensor, name
 
