@@ -28,6 +28,7 @@ import torch.nn.functional as F
 import torchvision
 from torchvision import transforms
 from tensorboardX import SummaryWriter
+from utils.util_semseg import SS_Evaluate
 
 np.random.seed(0)
 torch.manual_seed(0)
@@ -48,7 +49,7 @@ def build_parser():
     parser.add_argument('--epochs', type=int, default=500, metavar='N',
                         help='number of epochs for training (default: 3000)')
     parser.add_argument('--gpu', type=int, default=0, help='choose which GPU to use')
-    parser.add_argument('--batch-size', type=int, default=32, metavar='N',
+    parser.add_argument('--batch-size', type=int, default=8, metavar='N',
                         help='input batch size for training (default: 32)')
     parser.add_argument('--lr', type=float, default=1e-5, metavar='LR',
                         help='learning rate (default: 0.01)')
@@ -69,10 +70,10 @@ def save_cmd(log_dir):
 
 if __name__ == "__main__":
     args = build_parser()
-    tb = SummaryWriter()
+    tb = SummaryWriter('./logs/centralized/deeplabv3_cityspace/')
     save_cmd(tb.logdir)
     log_name = tb.logdir.split('/')[-1]
-    logger = Logger("train-%s" % (log_name), LOG_DIR)
+    logger = Logger("train-%s" % (log_name), tb.logdir)
 
     model_sel = {}
     if args.model == 'CrackNet':
@@ -84,24 +85,22 @@ if __name__ == "__main__":
     elif args.model == 'DeepLabv3':
         model_sel['model'] = DeepLabv3
 
-    new_height, new_width = [int(x) for x in args.img_size.split(',')]
-    seq = iaa.Sequential([
-        iaa.Fliplr(.5),
-        iaa.Affine(
+    #new_height, new_width = [int(x) for x in args.img_size.split(',')]
+    #seq = iaa.Sequential([
+        #iaa.Fliplr(.5),
+        #iaa.Affine(
             #scale=(.75, 1.33),
-            translate_percent={'x': (-.05, .05), 'y': (-.05, .05)},
-            rotate=(-25, 25)
-        ),
+            #translate_percent={'x': (-.05, .05), 'y': (-.05, .05)},
+            #rotate=(-25, 25)
+        #),
         #iaa.GammaContrast((.4, 2.5)),
         #iaa.GaussianBlur((0, 3.0)),
 
         # Resize images to given size
-        iaa.Resize({'height': new_height, 'width': new_width}),
-    ])
+        #iaa.Resize({'height': new_height, 'width': new_width}),
+    #])
 
-    train_dataset = Dataset(
-        args.dataset_path,
-        transform=seq)
+    train_dataset = Dataset(args.dataset_path)
 
     dataloader = DataLoader(
         train_dataset,
@@ -109,19 +108,28 @@ if __name__ == "__main__":
         num_workers=1,
         shuffle=True)
 
-    model_path = get_dir(MODEL_DIR, log_name)
+    test_dataset = Dataset('./datasets/cityspace/test/', type_='test')
+    test_dataloader = DataLoader(test_dataset,
+                                 batch_size=args.batch_size,
+                                 shuffle=True,
+                                 num_workers=1)
+
+    model_path = get_dir(tb.logdir, log_name)
 
     device = torch.device('cuda:%d' % (args.gpu) if torch.cuda.is_available() else 'cpu')
-    model = model_sel['model'](n_classes=2)
+    model = model_sel['model'](n_classes=19)
     model = model.to(device)
     model.train()
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
     criterion = nn.BCELoss()
 
     for epoch in range(1, args.epochs + 1):
+        model.train()
+        model.aux_mode = 'train'
         loss = AverageMeter()
-        for imgs, imgs_inv, masks in tqdm(dataloader):
-            *logits, = model(imgs.to(device), imgs_inv.to(device))
+        for imgs, masks, names in tqdm(dataloader):
+            #*logits, = model(imgs.to(device), imgs_inv.to(device))
+            *logits, = model(imgs.to(device))
             pred_masks = [F.softmax(logit, dim=1) for logit in logits]
             dist = [criterion(pred_mask, masks.to(device)) for pred_mask in pred_masks]
             dist = sum(dist)
@@ -132,7 +140,29 @@ if __name__ == "__main__":
         logger.info("Train epoch: %2d, loss=%.4f" % (epoch, loss.avg))
         tb.add_scalar('Train.Loss', loss.avg, epoch)
 
-        if epoch % args.save_epoch == 0:
+        if epoch % 5 != 4:
+            continue
+
+        dicts= SS_Evaluate(model, test_dataloader, device)
+        for k, v in dicts.items():
+            if k == 'mIoU':
+                tb.add_scalar('Eval.mIOU', v, epoch)
+            elif k == 'mPrecision':
+                tb.add_scalar('Eval.mPrecision', v, epoch)
+            elif k == 'mRecall':
+                tb.add_scalar('Eval.mRecall', v, epoch)
+            elif k == 'mF1':
+                tb.add_scalar('Eval.mF1', v, epoch)
+            else:
+                tb.add_scalar('Eval.' + k + '.IoU', v['IoU'], epoch)
+                tb.add_scalar('Eval.' + k + '.Precision', v['Precision'], epoch)
+                tb.add_scalar('Eval.' + k + '.Recall', v['Recall'], epoch)
+                tb.add_scalar('Eval.' + k + '.F1', v['F1'], epoch)
+
+        log_info = "[Cloud FL: %d] [Eval.AvgIOU: %f, Eval.AvgPrecision: %f, Eval.AvgRecall: %f, Eval.AvgF1: %f]" % (epoch, dicts['mIoU'], dicts['mPrecision'], dicts['mRecall'], dicts['mF1'])
+        print(log_info)
+
+        if epoch % 50 == 49:
             save_path = os.path.join(model_path, "epoch-%d.pt" % epoch)
             torch.save(model.state_dict(), save_path)
     tb.close()

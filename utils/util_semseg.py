@@ -19,8 +19,8 @@ from utils.utils import get_classes
 
 def SS_calc_metric(gt_mask, pred_mask):
     t = pred_mask
-    t[t >= 0.3] = 1.0
-    t[t < 0.3] = 0.0
+    t[t <= 50] = 1.0
+    t[t > 50] = 0.0
     pred_mask = t
     gt_mask = gt_mask.astype(int).flatten()
     pred_mask = pred_mask.astype(int).flatten()
