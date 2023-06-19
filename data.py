@@ -45,6 +45,8 @@ class Dataset(Dataset):
             transforms.ToTensor()
         ])
 
+        self.mask_to_tensor = transforms.Compose([transforms.ToTensor()])
+
         self.type_ = type_
 
         self.images = sorted(os.listdir(self.img_dir))
@@ -52,16 +54,11 @@ class Dataset(Dataset):
 
         self.size = len(self.images)
 
-        if self.type_ == 'train':
-            self.mask_to_tensor = transforms.Compose([
-                transforms.ToTensor()
-            ])
-
     def mask_to_layers(self, mask, num_classes):
         layers = []
         for i in range(num_classes):
-            layer = 255.0 * np.ones_like(mask)
-            layer[mask == i] = 1.0
+            layer = np.zeros_like(mask)
+            layer[mask == i] = 1
             layer = torch.Tensor(layer[np.newaxis,...])
             layers.append(layer)
         return layers

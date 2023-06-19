@@ -19,19 +19,22 @@ from utils.utils import get_classes
 
 def SS_calc_metric(gt_mask, pred_mask):
     t = pred_mask
-    t[t <= 50] = 1.0
-    t[t > 50] = 0.0
+    t[t >= 0.5] = 1
+    t[t < 0.5] = 0
     pred_mask = t
+
+    gt_mask[gt_mask >= 0.5] = 1
+    gt_mask[gt_mask < 0.5] = 0
+
     gt_mask = gt_mask.astype(int).flatten()
     pred_mask = pred_mask.astype(int).flatten()
-    gt_mask[gt_mask == 255] = 0
 
     intersection = np.sum(gt_mask * pred_mask)
 
-    iou = intersection / (np.sum(gt_mask + pred_mask) + 1e-8)
-    prec = intersection / (np.sum(pred_mask) + 1e-8)
-    reca = intersection / (np.sum(gt_mask) + 1e-8)
-    f_one = 2 * prec * reca / (prec + reca + 1e-8)
+    iou = intersection / (np.sum(gt_mask + pred_mask <= 2) + 1e-6)
+    prec = intersection / (np.sum(pred_mask == 1) + 1e-6)
+    reca = intersection / (np.sum(gt_mask == 1) + 1e-6)
+    f_one = 2 * prec * reca / (prec + reca + 1e-6)
 
     return iou, prec, reca, f_one
 
