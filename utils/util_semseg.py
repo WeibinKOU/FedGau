@@ -1,3 +1,4 @@
+from __future__ import print_function, absolute_import, division
 from sklearn.metrics import jaccard_score as jaccard
 from sklearn.metrics import precision_score as precision
 from sklearn.metrics import recall_score as recall
@@ -9,6 +10,8 @@ import torch.nn as nn
 from tqdm import tqdm
 import torch.optim as optim
 import torch.nn.functional as F
+import copy
+import math
 
 from model.fasterrcnn.frcnn_training import FasterRCNNTrainer
 import os
@@ -16,6 +19,30 @@ from utils.utils import get_lr
 from utils.utils_map import get_map
 from utils.callbacks import EvalCallback
 from utils.utils import get_classes
+from collections import namedtuple
+
+import os, sys
+import platform
+import fnmatch
+
+try:
+    from itertools import izip
+except ImportError:
+    izip = zip
+
+# Cityscapes imports
+#from csEvaluation.csHelpers import *
+
+# C Support
+# Enable the cython support for faster evaluation
+# Only tested for Ubuntu 64bit OS
+CSUPPORT = True
+# Check if C-Support is available for better performance
+if CSUPPORT:
+    try:
+        from utils.csEvaluation import addToConfusionMatrix
+    except:
+        CSUPPORT = False
 
 def calculate_recall(gt_mask, pred_mask):
     true_positive = np.sum(np.logical_and(gt_mask, pred_mask))
@@ -39,6 +66,74 @@ def calculate_f1_score(recall, precision):
     f1_score = 2 * (precision * recall) / (precision + recall + 1e-6)
     return f1_score
 
+Label = namedtuple('Label', [ 'name', 'id', 'trainId', 'category', 'categoryId', 'hasInstances', 'ignoreInEval', 'color',])
+
+labels = [
+    #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
+    Label(  'road'                 ,  7 ,        0 , 'flat'            , 1       , False        , False        , (128, 64,128) ),
+    Label(  'sidewalk'             ,  8 ,        1 , 'flat'            , 1       , False        , False        , (244, 35,232) ),
+    Label(  'building'             , 11 ,        2 , 'construction'    , 2       , False        , False        , ( 70, 70, 70) ),
+    Label(  'wall'                 , 12 ,        3 , 'construction'    , 2       , False        , False        , (102,102,156) ),
+    Label(  'fence'                , 13 ,        4 , 'construction'    , 2       , False        , False        , (190,153,153) ),
+    Label(  'pole'                 , 17 ,        5 , 'object'          , 3       , False        , False        , (153,153,153) ),
+    Label(  'traffic light'        , 19 ,        6 , 'object'          , 3       , False        , False        , (250,170, 30) ),
+    Label(  'traffic sign'         , 20 ,        7 , 'object'          , 3       , False        , False        , (220,220,  0) ),
+    Label(  'vegetation'           , 21 ,        8 , 'nature'          , 4       , False        , False        , (107,142, 35) ),
+    Label(  'terrain'              , 22 ,        9 , 'nature'          , 4       , False        , False        , (152,251,152) ),
+    Label(  'sky'                  , 23 ,       10 , 'sky'             , 5       , False        , False        , ( 70,130,180) ),
+    Label(  'person'               , 24 ,       11 , 'human'           , 6       , True         , False        , (220, 20, 60) ),
+    Label(  'rider'                , 25 ,       12 , 'human'           , 6       , True         , False        , (255,  0,  0) ),
+    Label(  'car'                  , 26 ,       13 , 'vehicle'         , 7       , True         , False        , (  0,  0,142) ),
+    Label(  'truck'                , 27 ,       14 , 'vehicle'         , 7       , True         , False        , (  0,  0, 70) ),
+    Label(  'bus'                  , 28 ,       15 , 'vehicle'         , 7       , True         , False        , (  0, 60,100) ),
+    Label(  'train'                , 31 ,       16 , 'vehicle'         , 7       , True         , False        , (  0, 80,100) ),
+    Label(  'motorcycle'           , 32 ,       17 , 'vehicle'         , 7       , True         , False        , (  0,  0,230) ),
+    Label(  'bicycle'              , 33 ,       18 , 'vehicle'         , 7       , True         , False        , (119, 11, 32) ),
+    Label(  'ignore'               , -1 ,       19 , 'void'            , 0       , False        , True         , (  0,  0,142) ),
+]
+
+# Generate empty confusion matrix and create list of relevant labels
+def generateMatrix():
+    evalLabels = []
+    for label in labels:
+        # we append all found labels, regardless of being ignored
+        evalLabels.append(label.trainId)
+    maxId = max(evalLabels)
+    # We use longlong type to be sure that there are no overflows
+    return evalLabels, np.zeros(shape=(maxId+1, maxId+1),dtype=np.ulonglong)
+
+# Main evaluation method. Evaluates pairs of prediction and ground truth
+# images which are passed as arguments.
+def sampleEvaluate(pred_mask, gt_mask, evalLabels, confMatrix):
+    predictionNp  = np.array(pred_mask)
+    groundTruthNp = np.array(gt_mask)
+
+    imgWidth  = predictionNp.shape[0]
+    imgHeight = predictionNp.shape[1]
+    nbPixels  = imgWidth*imgHeight
+
+
+    # Evaluate images
+    if (CSUPPORT):
+        # using cython
+        confMatrix = addToConfusionMatrix.cEvaluatePair(predictionNp, groundTruthNp, confMatrix, evalLabels)
+    else:
+        # the slower python way
+        encoding_value = max(groundTruthNp.max(), predictionNp.max()).astype(np.int32) + 1
+        encoded = (groundTruthNp.astype(np.int32) * encoding_value) + predictionNp
+
+        values, cnt = np.unique(encoded, return_counts=True)
+
+        for value, c in zip(values, cnt):
+            pred_id = value % encoding_value
+            gt_id = int((value - pred_id)/encoding_value)
+            if not gt_id in evalLabels:
+                printError("Unknown label with id {:}".format(gt_id))
+            confMatrix[gt_id][pred_id] += c
+
+    return nbPixels
+
+
 def SS_calc_metric(gt_mask, pred_mask):
     pred_mask[pred_mask >= 0.3] = 1
     pred_mask[pred_mask < 0.3] = 0
@@ -59,6 +154,44 @@ def SS_calc_metric(gt_mask, pred_mask):
 
     return iou, prec, reca, f_one
 
+# Calculate and return IOU score for a particular label
+def getMetricsForLabel(label, confMatrix, evalLabels):
+    # the number of true positive pixels for this label
+    # the entry on the diagonal of the confusion matrix
+    tp = np.longlong(confMatrix[label,label])
+
+    # the number of false negative pixels for this label
+    # the row sum of the matching row in the confusion matrix
+    # minus the diagonal entry
+    fn = np.longlong(confMatrix[label,:].sum()) - tp
+
+    # the number of false positive pixels for this labels
+    # Only pixels that are not on a pixel with ground truth label that is ignored
+    # The column sum of the corresponding column in the confusion matrix
+    # without the ignored rows and without the actual label of interest
+    notIgnored = [l for l in evalLabels if not labels[l].ignoreInEval and not l==label]
+    fp = np.longlong(confMatrix[notIgnored,label].sum())
+
+    # the denominator of the IOU score
+    denom = (tp + fp + fn + 1e-6)
+
+    iou = float(tp) / denom
+
+    # return IOU
+    return iou, iou, iou, iou
+
+# Get average of scores.
+# Only computes the average over valid entries.
+def getMetricsAvg(scoreList):
+    validScores = 0
+    scoreSum    = 0.0
+    for score in scoreList:
+        if not math.isnan(scoreList[score]):
+            validScores += 1
+            scoreSum += scoreList[score]
+    avg_iou = scoreSum / (validScores + 1e-6)
+    return avg_iou, avg_iou, avg_iou, avg_iou
+
 def SS_Evaluate(model, dataloader, dev):
     model.eval()
     model.aux_mode = 'test'
@@ -70,50 +203,40 @@ def SS_Evaluate(model, dataloader, dev):
         recall = []
         f1 = []
         res_dict = {}
+        evalLabels, confMatrix = generateMatrix()
+        nbPixels = 0
         for imgs, masks, names in tqdm(dataloader):
-            pred_masks = F.softmax(model(imgs.to(dev)), dim=1)
+            _masks = F.softmax(model(imgs.to(dev)), dim=1)
+            max_prob, pred_masks = torch.max(_masks, dim=1)
+
             masks = masks.squeeze().numpy()
             pred_masks = pred_masks.squeeze().detach().cpu().numpy()
+            for i in range(masks.shape[0]):
+                nbPixels += sampleEvaluate(pred_masks[i], masks[i], evalLabels, confMatrix)
 
-            for j in range(masks.shape[1]):
-                cla_dict = {}
-                cla_iou = []
-                cla_precision = []
-                cla_recall = []
-                cla_f1 = []
-                for i in range(masks.shape[0]):
-                    iou_t, pre_t, rec_t, f1_t = SS_calc_metric(masks[i,j], pred_masks[i,j])
-                    cla_iou.append(iou_t)
-                    cla_precision.append(pre_t)
-                    cla_recall.append(rec_t)
-                    cla_f1.append(f1_t)
-                cla_avg_iou = sum(cla_iou) / len(cla_iou)
-                cla_avg_pre = sum(cla_precision) / len(cla_precision)
-                cla_avg_recall = sum(cla_recall) / len(cla_recall)
-                cla_avg_f1 = sum(cla_f1) / len(cla_f1)
+        if confMatrix.sum() != nbPixels:
+            printError('Number of analyzed pixels and entries in confusion matrix disagree: contMatrix {}, pixels {}'.format(confMatrix.sum(),nbPixels))
 
-                cla_dict['IoU'] = cla_avg_iou
-                cla_dict['Precision'] = cla_avg_pre
-                cla_dict['Recall'] = cla_avg_recall
-                cla_dict['F1'] = cla_avg_f1
-                res_dict[cla_names[j]] = cla_dict
+        scoreList = {}
+        for label in evalLabels:
+            classScoreList = {}
+            labelName = cla_names[label]
+            iou, pre, recall, f1 = getMetricsForLabel(label, confMatrix, evalLabels)
 
-            iou.append(cla_avg_iou)
-            precision.append(cla_avg_pre)
-            recall.append(cla_avg_recall)
-            f1.append(cla_avg_f1)
+            classScoreList['IoU'] = iou
+            classScoreList['Precision'] = pre
+            classScoreList['Recall'] = recall
+            classScoreList['F1'] = f1
+            scoreList[labelName] = classScoreList
+        miou, mpre, mrec, mf1 = getMetricsAvg(classScoreList)
 
-        avg_iou = sum(iou) / len(iou)
-        avg_pre = sum(precision) / len(precision)
-        avg_recall = sum(recall) / len(recall)
-        avg_f1 = sum(f1) / len(f1)
+        scoreList['mIoU'] = miou
+        scoreList['mPrecision'] = mpre
+        scoreList['mRecall'] = mrec
+        scoreList['mF1'] = mf1
 
-        res_dict['mIoU'] = avg_iou
-        res_dict['mPrecision'] = avg_pre
-        res_dict['mRecall'] = avg_recall
-        res_dict['mF1'] = avg_f1
     model.train()
-    return res_dict
+    return scoreList
 
 def classi_Evaluate(model, testloader, dev):
     criterion = nn.CrossEntropyLoss()
@@ -146,7 +269,6 @@ def objDect_Evaluate(model, testloader, dev, val_lines, epoch_step_val, logdir, 
 
     class_names, num_classes = get_classes(classes_path)
     eval_callback   = EvalCallback(model, input_shape, class_names, num_classes, val_lines, logdir, torch.cuda.is_available())
-    
 
     with tqdm(total=epoch_step_val, postfix=dict,mininterval=0.3) as pbar:
         for iteration, batch in enumerate(testloader):
@@ -159,10 +281,8 @@ def objDect_Evaluate(model, testloader, dev, val_lines, epoch_step_val, logdir, 
                 train_util.optimizer.zero_grad()
                 _, _, _, _, val_total = train_util.forward(images, boxes, labels, 1)
                 val_loss += val_total.item()
-                
+
                 pbar.set_postfix(**{'val_loss'  : val_loss / (iteration + 1)})
                 pbar.update(1)
-
     ap_dict = eval_callback.on_epoch_end(epoch)
-    
     return val_loss / epoch_step_val, ap_dict

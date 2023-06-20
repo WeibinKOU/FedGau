@@ -93,8 +93,11 @@ class Dataset(Dataset):
             mask[mask >= 18] = 19
             mask_tensor = torch.from_numpy(mask).long()
         else:
-            mask_layers = self.mask_to_layers(mask)
-            mask_tensor = torch.cat(mask_layers, dim=0).squeeze()
+            #mask_layers = self.mask_to_layers(mask)
+            #mask_tensor = torch.cat(mask_layers, dim=0).squeeze()
+            mask = mask.squeeze()
+            mask[mask >= 18] = 19
+            mask_tensor = torch.from_numpy(mask).long()
 
         return img_tensor, mask_tensor, name
 
