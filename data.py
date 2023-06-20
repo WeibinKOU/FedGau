@@ -81,8 +81,9 @@ class Dataset(Dataset):
             mask = new_comb[:,:,3:]
 
         img_tensor = self.img_to_tensor(img)
-        mask_layers = self.mask_to_layers(mask, self.num_classes)
-        mask_tensor = torch.cat(mask_layers, dim=0).squeeze()
+        #mask_layers = self.mask_to_layers(mask, self.num_classes)
+        #mask_tensor = torch.cat(mask_layers, dim=0).squeeze()
+        mask_tensor = torch.from_numpy(mask.squeeze()).to(torch.int64)
 
         return img_tensor, mask_tensor, name
 

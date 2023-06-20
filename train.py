@@ -121,14 +121,14 @@ if __name__ == "__main__":
     model = model.to(device)
     model.train()
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
-    criterion = nn.BCELoss()
+    #criterion = nn.BCELoss()
+    criterion = nn.CrossEntropyLoss(ignore_index=255)
 
     for epoch in range(1, args.epochs + 1):
         model.train()
         model.aux_mode = 'train'
         loss = AverageMeter()
         for imgs, masks, names in tqdm(dataloader):
-            #*logits, = model(imgs.to(device), imgs_inv.to(device))
             *logits, = model(imgs.to(device))
             pred_masks = [F.softmax(logit, dim=1) for logit in logits]
             dist = [criterion(pred_mask, masks.to(device)) for pred_mask in pred_masks]
