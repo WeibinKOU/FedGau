@@ -17,24 +17,45 @@ from utils.utils_map import get_map
 from utils.callbacks import EvalCallback
 from utils.utils import get_classes
 
-def SS_calc_metric(gt_mask, pred_mask):
-    t = pred_mask
-    t[t >= 0.5] = 1
-    t[t < 0.5] = 0
-    pred_mask = t
+def calculate_recall(gt_mask, pred_mask):
+    true_positive = np.sum(np.logical_and(gt_mask, pred_mask))
+    false_negative = np.sum(np.logical_and(gt_mask, np.logical_not(pred_mask)))
+    recall = true_positive / (true_positive + false_negative + 1e-6)
+    return recall
 
-    gt_mask[gt_mask >= 0.5] = 1
-    gt_mask[gt_mask < 0.5] = 0
+def calculate_iou(gt_mask, pred_mask):
+    intersection = np.sum(np.logical_and(gt_mask, pred_mask))
+    union = np.sum(np.logical_or(gt_mask, pred_mask)) + 1e-6
+    iou = intersection / union
+    return iou
+
+def calculate_precision(gt_mask, pred_mask):
+    true_positive = np.sum(np.logical_and(gt_mask, pred_mask))
+    false_positive = np.sum(np.logical_and(np.logical_not(gt_mask), pred_mask))
+    precision = true_positive / (true_positive + false_positive + 1e-6)
+    return precision
+
+def calculate_f1_score(recall, precision):
+    f1_score = 2 * (precision * recall) / (precision + recall + 1e-6)
+    return f1_score
+
+def SS_calc_metric(gt_mask, pred_mask):
+    pred_mask[pred_mask >= 0.3] = 1
+    pred_mask[pred_mask < 0.3] = 0
 
     gt_mask = gt_mask.astype(int).flatten()
     pred_mask = pred_mask.astype(int).flatten()
 
-    intersection = np.sum(gt_mask * pred_mask)
+    #intersection = np.sum(gt_mask * pred_mask)
+    #iou = intersection / (np.sum(gt_mask + pred_mask <= 2) + 1e-6)
+    #prec = intersection / (np.sum(pred_mask == 1) + 1e-6)
+    #reca = intersection / (np.sum(gt_mask == 1) + 1e-6)
+    #f_one = 2 * prec * reca / (prec + reca + 1e-6)
 
-    iou = intersection / (np.sum(gt_mask + pred_mask <= 2) + 1e-6)
-    prec = intersection / (np.sum(pred_mask == 1) + 1e-6)
-    reca = intersection / (np.sum(gt_mask == 1) + 1e-6)
-    f_one = 2 * prec * reca / (prec + reca + 1e-6)
+    iou = calculate_iou(gt_mask, pred_mask)
+    prec = calculate_precision(gt_mask, pred_mask)
+    reca = calculate_recall(gt_mask, pred_mask)
+    f_one = calculate_f1_score(prec, reca)
 
     return iou, prec, reca, f_one
 

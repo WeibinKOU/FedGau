@@ -24,3 +24,5 @@ logs/
 model/fasterrcnn/model_data/resnet50-19c8e357.pth
 model/fasterrcnn/*.swp
 utils/.*.py.swp
+MultiFL/.*.py.swo
+MultiFL/.*.py.swp

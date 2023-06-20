@@ -159,7 +159,7 @@ if __name__ == "__main__":
                 tb.add_scalar('Eval.' + k + '.Recall', v['Recall'], epoch)
                 tb.add_scalar('Eval.' + k + '.F1', v['F1'], epoch)
 
-        log_info = "[Epoch: %d] [Eval.AvgIOU: %.3f%%, Eval.AvgPrecision: %.3f%%, Eval.AvgRecall: %.3f%%, Eval.AvgF1: %.3f%%]" % (epoch, 100*dicts['mIoU'], 100*dicts['mPrecision'], 100*dicts['mRecall'], 100*dicts['mF1'])
+        log_info = "[Epoch: %d] [Eval.mIoU: %.3f%%, Eval.mPrecision: %.3f%%, Eval.mRecall: %.3f%%, Eval.mF1: %.3f%%]" % (epoch, 100*dicts['mIoU'], 100*dicts['mPrecision'], 100*dicts['mRecall'], 100*dicts['mF1'])
         print(log_info)
 
         if epoch % 50 == 49:
