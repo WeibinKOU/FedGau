@@ -17,7 +17,7 @@ from MultiFL.fed_config import WIDTH, HEIGHT
 
 class Dataset(Dataset):
 
-    def __init__(self, data_dir, num_classes=19, type_='train'): #type: [train, test]
+    def __init__(self, data_dir, num_classes=20, type_='train'): #type: [train, test]
         super().__init__()
 
         self.data_dir = data_dir
@@ -83,7 +83,9 @@ class Dataset(Dataset):
         img_tensor = self.img_to_tensor(img)
         #mask_layers = self.mask_to_layers(mask, self.num_classes)
         #mask_tensor = torch.cat(mask_layers, dim=0).squeeze()
-        mask_tensor = torch.from_numpy(mask.squeeze()).to(torch.int64)
+        mask = mask.squeeze()
+        mask[mask >= 18] = 19
+        mask_tensor = torch.from_numpy(mask).long()
 
         return img_tensor, mask_tensor, name
 

@@ -117,12 +117,12 @@ if __name__ == "__main__":
     model_path = get_dir(tb.logdir, log_name)
 
     device = torch.device('cuda:%d' % (args.gpu) if torch.cuda.is_available() else 'cpu')
-    model = model_sel['model'](n_classes=19)
+    model = model_sel['model'](n_classes=20)
     model = model.to(device)
     model.train()
     optimizer = optim.Adam(model.parameters(), lr=args.lr)
     #criterion = nn.BCELoss()
-    criterion = nn.CrossEntropyLoss(ignore_index=255)
+    criterion = nn.CrossEntropyLoss(ignore_index=19)
 
     for epoch in range(1, args.epochs + 1):
         model.train()
