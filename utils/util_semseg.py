@@ -62,7 +62,7 @@ def SS_calc_metric(gt_mask, pred_mask):
 def SS_Evaluate(model, dataloader, dev):
     model.eval()
     model.aux_mode = 'test'
-    cla_names = ['road', 'sidewalk', 'building', 'wall', 'fence', 'pole', 'trafficlight', 'trafficsign', 'vegetation', 'terrain', 'sky', 'person', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle']
+    cla_names = ['road', 'sidewalk', 'building', 'wall', 'fence', 'pole', 'trafficlight', 'trafficsign', 'vegetation', 'terrain', 'sky', 'person', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle', 'ignore']
 
     with torch.no_grad():
         iou = []

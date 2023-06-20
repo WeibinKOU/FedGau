@@ -54,13 +54,18 @@ class Dataset(Dataset):
 
         self.size = len(self.images)
 
-    def mask_to_layers(self, mask, num_classes):
+    def mask_to_layers(self, mask):
         layers = []
-        for i in range(num_classes):
+        for i in range(self.num_classes - 1):
             layer = np.zeros_like(mask)
             layer[mask == i] = 1
             layer = torch.Tensor(layer[np.newaxis,...])
             layers.append(layer)
+        layer = np.zeros_like(mask)
+        layer[mask >= self.num_classes - 1] = 1
+        layer = torch.Tensor(layer[np.newaxis,...])
+        layers.append(layer)
+
         return layers
 
     def __len__(self):
@@ -81,11 +86,15 @@ class Dataset(Dataset):
             mask = new_comb[:,:,3:]
 
         img_tensor = self.img_to_tensor(img)
-        #mask_layers = self.mask_to_layers(mask, self.num_classes)
+        #mask_layers = self.mask_to_layers(mask)
         #mask_tensor = torch.cat(mask_layers, dim=0).squeeze()
-        mask = mask.squeeze()
-        mask[mask >= 18] = 19
-        mask_tensor = torch.from_numpy(mask).long()
+        if self.type_ == 'train':
+            mask = mask.squeeze()
+            mask[mask >= 18] = 19
+            mask_tensor = torch.from_numpy(mask).long()
+        else:
+            mask_layers = self.mask_to_layers(mask)
+            mask_tensor = torch.cat(mask_layers, dim=0).squeeze()
 
         return img_tensor, mask_tensor, name
 
