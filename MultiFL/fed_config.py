@@ -17,35 +17,35 @@ task = 'semSeg' #alternatives: semSeg, objDect, classification
 semSeg = {
         'Edge0' : #Northern Germany
         {
-            'agg_coef': 0.274,
+            'agg_coef': 0.363,
             'Agent0' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client4/',
-                'lr': 0.003,
+                'lr': 0.0003,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.383,
+                'agg_coef': 0.535,
             },
 
             'Agent1' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client6/',
-                'lr': 0.003,
+                'lr': 0.0003,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.293,
+                'agg_coef': 0.265,
             },
 
             'Agent2' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client7/',
-                'lr': 0.003,
+                'lr': 0.0003,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.324,
+                'agg_coef': 0.201,
             },
         },
 
@@ -55,7 +55,7 @@ semSeg = {
             'Agent0' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client1/',
-                'lr': 0.003,
+                'lr': 0.0003,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
@@ -65,7 +65,7 @@ semSeg = {
             'Agent1' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client2/',
-                'lr': 0.003,
+                'lr': 0.0003,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
@@ -75,25 +75,25 @@ semSeg = {
 
         'Edge2': #Western Germany - Cental
         {
-            'agg_coef': 0.374,
+            'agg_coef': 0.285,
             'Agent0' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client3/',
-                'lr': 0.003,
+                'lr': 0.0003,
                 'batch_size': 8,
                'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.496,
+                'agg_coef': 0.652,
             },
 
             'Agent1' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client5/',
-                'lr': 0.003,
+                'lr': 0.0003,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.504,
+                'agg_coef': 0.348,
             }
         },
 

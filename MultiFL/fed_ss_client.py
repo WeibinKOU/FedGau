@@ -46,7 +46,8 @@ class SemSegClient():
 
         self.updated_model = None
         self.epoch_cnt = 0
-        self.criterion = nn.BCELoss().to(self.dev)
+        #self.criterion = nn.BCELoss().to(self.dev)
+        self.criterion = nn.CrossEntropyLoss(ignore_index=19).to(self.dev)
 
         self.dataset = Dataset(self.config[self.eid][self.cid]['dataset'])
         self.dataloader = DataLoader(self.dataset,
