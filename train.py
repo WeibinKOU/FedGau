@@ -142,13 +142,13 @@ if __name__ == "__main__":
         logger.info("Train epoch: %2d, loss=%.4f" % (epoch, loss.avg))
         tb.add_scalar('Train.Loss', loss.avg, epoch)
 
-        if epoch % 5 != 4:
-            continue
+        #if epoch % 5 != 4:
+        #    continue
 
         clsdicts, catdicts = SS_Evaluate(model, test_dataloader, device)
         for k, v in clsdicts.items():
             if k == 'mIoU':
-                tb.add_scalar('Eval.Class.mIOU', v, epoch)
+                tb.add_scalar('Eval.Class.mIoU', v, epoch)
             elif k == 'mPrecision':
                 tb.add_scalar('Eval.Class.mPrecision', v, epoch)
             elif k == 'mRecall':
@@ -163,7 +163,7 @@ if __name__ == "__main__":
 
         for k, v in catdicts.items():
             if k == 'mIoU':
-                tb.add_scalar('Eval.Category.mIOU', v, epoch)
+                tb.add_scalar('Eval.Category.mIoU', v, epoch)
             elif k == 'mPrecision':
                 tb.add_scalar('Eval.Category.mPrecision', v, epoch)
             elif k == 'mRecall':
