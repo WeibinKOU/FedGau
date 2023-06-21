@@ -58,6 +58,7 @@ def build_parser():
                         help='num of epochs saving the model (default: 10)')
     parser.add_argument("--model", type=str, default='DeepLabv3', help="To specify which model to be trained, options: [CrackNet, BiSeNetV2, SegNet, DeepLabv3]")
     parser.add_argument("--dataset-path", type=str, default='./datasets/cityspace/centralized/', help="To specify training dataset path")
+    #parser.add_argument("--dataset-path", type=str, default='./datasets/cityspace/zurich/', help="To specify training dataset path")
     args = parser.parse_args()
     return args
 
@@ -109,6 +110,7 @@ if __name__ == "__main__":
         shuffle=True)
 
     test_dataset = Dataset('./datasets/cityspace/test/', type_='test')
+    #test_dataset = Dataset('./datasets/cityspace/zurich/', type_='test')
     test_dataloader = DataLoader(test_dataset,
                                  batch_size=args.batch_size,
                                  shuffle=True,
@@ -143,24 +145,41 @@ if __name__ == "__main__":
         if epoch % 5 != 4:
             continue
 
-        dicts= SS_Evaluate(model, test_dataloader, device)
-        for k, v in dicts.items():
+        clsdicts, catdicts = SS_Evaluate(model, test_dataloader, device)
+        for k, v in clsdicts.items():
             if k == 'mIoU':
-                tb.add_scalar('Eval.mIOU', v, epoch)
+                tb.add_scalar('Eval.Class.mIOU', v, epoch)
             elif k == 'mPrecision':
-                tb.add_scalar('Eval.mPrecision', v, epoch)
+                tb.add_scalar('Eval.Class.mPrecision', v, epoch)
             elif k == 'mRecall':
-                tb.add_scalar('Eval.mRecall', v, epoch)
+                tb.add_scalar('Eval.Class.mRecall', v, epoch)
             elif k == 'mF1':
-                tb.add_scalar('Eval.mF1', v, epoch)
+                tb.add_scalar('Eval.Class.mF1', v, epoch)
             else:
-                tb.add_scalar('Eval.' + k + '.IoU', v['IoU'], epoch)
-                tb.add_scalar('Eval.' + k + '.Precision', v['Precision'], epoch)
-                tb.add_scalar('Eval.' + k + '.Recall', v['Recall'], epoch)
-                tb.add_scalar('Eval.' + k + '.F1', v['F1'], epoch)
+                tb.add_scalar('Eval.Class.' + k + '.IoU', v['IoU'], epoch)
+                tb.add_scalar('Eval.Class.' + k + '.Precision', v['Precision'], epoch)
+                tb.add_scalar('Eval.Class.' + k + '.Recall', v['Recall'], epoch)
+                tb.add_scalar('Eval.Class.' + k + '.F1', v['F1'], epoch)
 
-        log_info = "[Epoch: %d] [Eval.mIoU: %.3f%%, Eval.mPrecision: %.3f%%, Eval.mRecall: %.3f%%, Eval.mF1: %.3f%%]" % (epoch, 100*dicts['mIoU'], 100*dicts['mPrecision'], 100*dicts['mRecall'], 100*dicts['mF1'])
-        print(log_info)
+        for k, v in catdicts.items():
+            if k == 'mIoU':
+                tb.add_scalar('Eval.Category.mIOU', v, epoch)
+            elif k == 'mPrecision':
+                tb.add_scalar('Eval.Category.mPrecision', v, epoch)
+            elif k == 'mRecall':
+                tb.add_scalar('Eval.Category.mRecall', v, epoch)
+            elif k == 'mF1':
+                tb.add_scalar('Eval.Category.mF1', v, epoch)
+            else:
+                tb.add_scalar('Eval.Category.' + k + '.IoU', v['IoU'], epoch)
+                tb.add_scalar('Eval.Category.' + k + '.Precision', v['Precision'], epoch)
+                tb.add_scalar('Eval.Category.' + k + '.Recall', v['Recall'], epoch)
+                tb.add_scalar('Eval.Category.' + k + '.F1', v['F1'], epoch)
+
+        log_cls_info = "[Epoch: %d] [Eval.Class.mIoU: %.2f%%, Eval.Class.mPrecision: %.2f%%, Eval.Class.mRecall: %.2f%%, Eval.Class.mF1: %.2f%%]" % (epoch, 100*clsdicts['mIoU'], 100*clsdicts['mPrecision'], 100*clsdicts['mRecall'], 100*clsdicts['mF1'])
+        log_cat_info = "[Epoch: %d] [Eval.Category.mIoU: %.2f%%, Eval.Category.mPrecision: %.2f%%, Eval.Category.mRecall: %.2f%%, Eval.Category.mF1: %.2f%%]" % (epoch, 100*catdicts['mIoU'], 100*catdicts['mPrecision'], 100*catdicts['mRecall'], 100*catdicts['mF1'])
+        print(log_cls_info)
+        print(log_cat_info)
 
         if epoch % 50 == 49:
             save_path = os.path.join(model_path, "epoch-%d.pt" % epoch)

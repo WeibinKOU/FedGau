@@ -30,14 +30,7 @@ try:
 except ImportError:
     izip = zip
 
-# Cityscapes imports
-#from csEvaluation.csHelpers import *
-
-# C Support
-# Enable the cython support for faster evaluation
-# Only tested for Ubuntu 64bit OS
 CSUPPORT = True
-# Check if C-Support is available for better performance
 if CSUPPORT:
     try:
         from utils.csEvaluation import addToConfusionMatrix
@@ -92,18 +85,21 @@ labels = [
     Label(  'ignore'               , -1 ,       19 , 'void'            , 0       , False        , True         , (  0,  0,142) ),
 ]
 
-# Generate empty confusion matrix and create list of relevant labels
+category2labels = {}
+for label in labels:
+    category = label.category
+    if category in category2labels:
+        category2labels[category].append(label)
+    else:
+        category2labels[category] = [label]
+
 def generateMatrix():
     evalLabels = []
     for label in labels:
-        # we append all found labels, regardless of being ignored
         evalLabels.append(label.trainId)
     maxId = max(evalLabels)
-    # We use longlong type to be sure that there are no overflows
     return evalLabels, np.zeros(shape=(maxId+1, maxId+1),dtype=np.ulonglong)
 
-# Main evaluation method. Evaluates pairs of prediction and ground truth
-# images which are passed as arguments.
 def sampleEvaluate(pred_mask, gt_mask, evalLabels, confMatrix):
     predictionNp  = np.array(pred_mask)
     groundTruthNp = np.array(gt_mask)
@@ -112,13 +108,9 @@ def sampleEvaluate(pred_mask, gt_mask, evalLabels, confMatrix):
     imgHeight = predictionNp.shape[1]
     nbPixels  = imgWidth*imgHeight
 
-
-    # Evaluate images
     if (CSUPPORT):
-        # using cython
         confMatrix = addToConfusionMatrix.cEvaluatePair(predictionNp, groundTruthNp, confMatrix, evalLabels)
     else:
-        # the slower python way
         encoding_value = max(groundTruthNp.max(), predictionNp.max()).astype(np.int32) + 1
         encoded = (groundTruthNp.astype(np.int32) * encoding_value) + predictionNp
 
@@ -154,43 +146,62 @@ def SS_calc_metric(gt_mask, pred_mask):
 
     return iou, prec, reca, f_one
 
-# Calculate and return IOU score for a particular label
 def getMetricsForLabel(label, confMatrix, evalLabels):
-    # the number of true positive pixels for this label
-    # the entry on the diagonal of the confusion matrix
     tp = np.longlong(confMatrix[label,label])
 
-    # the number of false negative pixels for this label
-    # the row sum of the matching row in the confusion matrix
-    # minus the diagonal entry
     fn = np.longlong(confMatrix[label,:].sum()) - tp
 
-    # the number of false positive pixels for this labels
-    # Only pixels that are not on a pixel with ground truth label that is ignored
-    # The column sum of the corresponding column in the confusion matrix
-    # without the ignored rows and without the actual label of interest
     notIgnored = [l for l in evalLabels if not labels[l].ignoreInEval and not l==label]
     fp = np.longlong(confMatrix[notIgnored,label].sum())
 
-    # the denominator of the IOU score
     denom = (tp + fp + fn + 1e-6)
 
     iou = float(tp) / denom
+    pre = float(tp) / (tp + fp + 1e-6)
+    rec = float(tp) / (tp + fn + 1e-6)
+    f1 = 2 * pre * rec / (pre + rec + 1e-6)
 
-    # return IOU
-    return iou, iou, iou, iou
+    return iou, pre, rec, f1
 
-# Get average of scores.
-# Only computes the average over valid entries.
+def getMetricsForCategory(category, confMatrix, evalLabels):
+    labels_in = category2labels[category]
+    labelIds = [label.trainId for label in labels_in if not label.ignoreInEval and label.trainId in evalLabels]
+
+    tp = np.longlong(confMatrix[labelIds,:][:,labelIds].sum())
+
+    fn = np.longlong(confMatrix[labelIds,:].sum()) - tp
+
+    notIgnoredAndNotInCategory = [l for l in evalLabels if not labels[l].ignoreInEval and labels[l].category != category]
+    fp = np.longlong(confMatrix[notIgnoredAndNotInCategory,:][:,labelIds].sum())
+
+    denom = (tp + fp + fn + 1e-6)
+    iou = float(tp) / denom
+    pre = float(tp) / (tp + fp + 1e-6)
+    rec = float(tp) / (tp + fn + 1e-6)
+    f1 = 2 * pre * rec / (pre + rec + 1e-6)
+
+    return iou, pre, rec, f1
+
 def getMetricsAvg(scoreList):
     validScores = 0
     scoreSum    = 0.0
-    for score in scoreList:
-        if not math.isnan(scoreList[score]):
-            validScores += 1
-            scoreSum += scoreList[score]
-    avg_iou = scoreSum / (validScores + 1e-6)
-    return avg_iou, avg_iou, avg_iou, avg_iou
+    iouSum = 0.0
+    preSum = 0.0
+    recSum = 0.0
+    f1Sum = 0.0
+    for label, metric in scoreList.items():
+        if label == 'ignore' or label == 'void':
+            continue
+        validScores += 1
+        iouSum += metric['IoU']
+        preSum += metric['Precision']
+        recSum += metric['Recall']
+        f1Sum += metric['F1']
+    avg_iou = iouSum / (validScores + 1e-6)
+    avg_pre = preSum / (validScores + 1e-6)
+    avg_rec = recSum / (validScores + 1e-6)
+    avg_f1 = f1Sum / (validScores + 1e-6)
+    return avg_iou, avg_pre, avg_rec, avg_f1
 
 def SS_Evaluate(model, dataloader, dev):
     model.eval()
@@ -202,7 +213,6 @@ def SS_Evaluate(model, dataloader, dev):
         precision = []
         recall = []
         f1 = []
-        res_dict = {}
         evalLabels, confMatrix = generateMatrix()
         nbPixels = 0
         for imgs, masks, names in tqdm(dataloader):
@@ -217,7 +227,7 @@ def SS_Evaluate(model, dataloader, dev):
         if confMatrix.sum() != nbPixels:
             printError('Number of analyzed pixels and entries in confusion matrix disagree: contMatrix {}, pixels {}'.format(confMatrix.sum(),nbPixels))
 
-        scoreList = {}
+        clsScoreList = {}
         for label in evalLabels:
             classScoreList = {}
             labelName = cla_names[label]
@@ -227,16 +237,33 @@ def SS_Evaluate(model, dataloader, dev):
             classScoreList['Precision'] = pre
             classScoreList['Recall'] = recall
             classScoreList['F1'] = f1
-            scoreList[labelName] = classScoreList
-        miou, mpre, mrec, mf1 = getMetricsAvg(classScoreList)
+            clsScoreList[labelName] = classScoreList
 
-        scoreList['mIoU'] = miou
-        scoreList['mPrecision'] = mpre
-        scoreList['mRecall'] = mrec
-        scoreList['mF1'] = mf1
+        miou, mpre, mrec, mf1 = getMetricsAvg(clsScoreList)
+        clsScoreList['mIoU'] = miou
+        clsScoreList['mPrecision'] = mpre
+        clsScoreList['mRecall'] = mrec
+        clsScoreList['mF1'] = mf1
+
+        catScoreList = {}
+        for category in category2labels.keys():
+            categoryScoreList = {}
+            iou, pre, recall, f1 = getMetricsForCategory(category, confMatrix, evalLabels)
+
+            categoryScoreList['IoU'] = iou
+            categoryScoreList['Precision'] = pre
+            categoryScoreList['Recall'] = recall
+            categoryScoreList['F1'] = f1
+            catScoreList[category] = categoryScoreList
+
+        miou, mpre, mrec, mf1 = getMetricsAvg(catScoreList)
+        catScoreList['mIoU'] = miou
+        catScoreList['mPrecision'] = mpre
+        catScoreList['mRecall'] = mrec
+        catScoreList['mF1'] = mf1
 
     model.train()
-    return scoreList
+    return clsScoreList, catScoreList
 
 def classi_Evaluate(model, testloader, dev):
     criterion = nn.CrossEntropyLoss()

@@ -236,28 +236,45 @@ class CloudServer():
         if self.task == 'semSeg':
             test_dataset = Dataset(self.config['test']['dataset'], type_='test')
             test_dataloader = DataLoader(test_dataset,
-                                             batch_size=self.config['test']['batch_size'],
-                                             shuffle=True,
-                                             num_workers=1)
+                                         batch_size=self.config['test']['batch_size'],
+                                         shuffle=True,
+                                         num_workers=1)
 
-            dicts= SS_Evaluate(self.model, test_dataloader, self.dev)
-            for k, v in dicts.items():
+            clsdicts, catdicts = SS_Evaluate(self.model, test_dataloader, self.dev)
+            for k, v in clsdicts.items():
                 if k == 'mIoU':
-                    self.tb.add_scalar('Cloud.Eval.mIOU', 100*v, self.fed_cnt)
+                    self.tb.add_scalar('Cloud.Eval.Class.mIOU', 100*v, self.fed_cnt)
                 elif k == 'mPrecision':
-                    self.tb.add_scalar('Cloud.Eval.mPrecision', 100*v, self.fed_cnt)
+                    self.tb.add_scalar('Cloud.Eval.Class.mPrecision', 100*v, self.fed_cnt)
                 elif k == 'mRecall':
-                    self.tb.add_scalar('Cloud.Eval.mRecall', 100*v, self.fed_cnt)
+                    self.tb.add_scalar('Cloud.Eval.Class.mRecall', 100*v, self.fed_cnt)
                 elif k == 'mF1':
-                    self.tb.add_scalar('Cloud.Eval.mF1', 100*v, self.fed_cnt)
+                    self.tb.add_scalar('Cloud.Eval.Class.mF1', 100*v, self.fed_cnt)
                 else:
-                    self.tb.add_scalar('Cloud.Eval.' + k + '.IoU', 100*v['IoU'], self.fed_cnt)
-                    self.tb.add_scalar('Cloud.Eval.' + k + '.Precision', 100*v['Precision'], self.fed_cnt)
-                    self.tb.add_scalar('Cloud.Eval.' + k + '.Recall', 100*v['Recall'], self.fed_cnt)
-                    self.tb.add_scalar('Cloud.Eval.' + k + '.F1', 100*v['F1'], self.fed_cnt)
+                    self.tb.add_scalar('Cloud.Eval.Class.' + k + '.IoU', 100*v['IoU'], self.fed_cnt)
+                    self.tb.add_scalar('Cloud.Eval.Class.' + k + '.Precision', 100*v['Precision'], self.fed_cnt)
+                    self.tb.add_scalar('Cloud.Eval.Class.' + k + '.Recall', 100*v['Recall'], self.fed_cnt)
+                    self.tb.add_scalar('Cloud.Eval.Class.' + k + '.F1', 100*v['F1'], self.fed_cnt)
 
-            log_info = "[Cloud FL: %d] [Cloud.FL.Eval.mIoU: %.3f%%, Cloud.FL.Eval.mPrecision: %.3f%%, Cloud.FL.Eval.mRecall: %.3f%%, Cloud.FL.Eval.mF1: %.3f%%]" % (self.fed_cnt, 100*dicts['mIoU'], 100*dicts['mPrecision'], 100*dicts['mRecall'], 100*dicts['mF1'])
-            print(log_info)
+            for k, v in catdicts.items():
+                if k == 'mIoU':
+                    self.tb.add_scalar('Cloud.Eval.Category.mIOU', 100*v, self.fed_cnt)
+                elif k == 'mPrecision':
+                    self.tb.add_scalar('Cloud.Eval.Category.mPrecision', 100*v, self.fed_cnt)
+                elif k == 'mRecall':
+                    self.tb.add_scalar('Cloud.Eval.Category.mRecall', 100*v, self.fed_cnt)
+                elif k == 'mF1':
+                    self.tb.add_scalar('Cloud.Eval.Category.mF1', 100*v, self.fed_cnt)
+                else:
+                    self.tb.add_scalar('Cloud.Eval.Category.' + k + '.IoU', 100*v['IoU'], self.fed_cnt)
+                    self.tb.add_scalar('Cloud.Eval.Category.' + k + '.Precision', 100*v['Precision'], self.fed_cnt)
+                    self.tb.add_scalar('Cloud.Eval.Category.' + k + '.Recall', 100*v['Recall'], self.fed_cnt)
+                    self.tb.add_scalar('Cloud.Eval.Category.' + k + '.F1', 100*v['F1'], self.fed_cnt)
+
+            log_cls_info = "[Cloud FL: %d] [Cloud.FL.Eval.Class.mIoU: %.2f%%, Cloud.FL.Eval.Class.mPrecision: %.2f%%, Cloud.FL.Eval.Class.mRecall: %.2f%%, Cloud.FL.Eval.Class.mF1: %.2f%%]" % (self.fed_cnt, 100*clsdicts['mIoU'], 100*clsdicts['mPrecision'], 100*clsdicts['mRecall'], 100*clsdicts['mF1'])
+            log_cat_info = "[Cloud FL: %d] [Cloud.FL.Eval.Category.mIoU: %.2f%%, Cloud.FL.Eval.Category.mPrecision: %.2f%%, Cloud.FL.Eval.Category.mRecall: %.2f%%, Cloud.FL.Eval.Category.mF1: %.2f%%]" % (self.fed_cnt, 100*catdicts['mIoU'], 100*catdicts['mPrecision'], 100*catdicts['mRecall'], 100*catdicts['mF1'])
+            print(log_cls_info)
+            print(log_cat_info)
         elif self.task == 'objDect':
             num_val = 0
             val_lines = None
