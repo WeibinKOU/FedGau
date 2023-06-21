@@ -208,18 +208,17 @@ def SS_Evaluate(model, dataloader, dev):
     model.aux_mode = 'test'
     cla_names = ['road', 'sidewalk', 'building', 'wall', 'fence', 'pole', 'trafficlight', 'trafficsign', 'vegetation', 'terrain', 'sky', 'person', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle', 'ignore']
 
+    eval_loss = 0.0
+    testdatalen = len(dataloader)
     with torch.no_grad():
-        iou = []
-        precision = []
-        recall = []
-        f1 = []
         evalLabels, confMatrix = generateMatrix()
         nbPixels = 0
         for imgs, masks, names in tqdm(dataloader):
             _masks = F.softmax(model(imgs.to(dev)), dim=1)
+            eval_loss += F.cross_entropy(_masks, masks.to(_masks.device), ignore_index=19)
             max_prob, pred_masks = torch.max(_masks, dim=1)
 
-            masks = masks.squeeze().numpy()
+            masks = masks.squeeze().detach().cpu().numpy()
             pred_masks = pred_masks.squeeze().detach().cpu().numpy()
             for i in range(masks.shape[0]):
                 nbPixels += sampleEvaluate(pred_masks[i], masks[i], evalLabels, confMatrix)
@@ -263,7 +262,7 @@ def SS_Evaluate(model, dataloader, dev):
         catScoreList['mF1'] = mf1
 
     model.train()
-    return clsScoreList, catScoreList
+    return clsScoreList, catScoreList, eval_loss / testdatalen
 
 def classi_Evaluate(model, testloader, dev):
     criterion = nn.CrossEntropyLoss()

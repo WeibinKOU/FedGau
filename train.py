@@ -139,13 +139,14 @@ if __name__ == "__main__":
             dist.backward()
             loss.update(dist.item())
             optimizer.step()
-        logger.info("Train epoch: %2d, loss=%.4f" % (epoch, loss.avg))
-        tb.add_scalar('Train.Loss', loss.avg, epoch)
-
         #if epoch % 5 != 4:
         #    continue
 
-        clsdicts, catdicts = SS_Evaluate(model, test_dataloader, device)
+        clsdicts, catdicts, eval_loss = SS_Evaluate(model, test_dataloader, device)
+        logger.info("Train epoch: %2d, Train.Loss=%.2f, Eval.Loss=%.2f" % (epoch, loss.avg, eval_loss))
+        tb.add_scalar('Train.Loss', loss.avg, epoch)
+        tb.add_scalar('Eval.Loss', eval_loss, epoch)
+
         for k, v in clsdicts.items():
             if k == 'mIoU':
                 tb.add_scalar('Eval.Class.mIoU', v, epoch)

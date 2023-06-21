@@ -102,7 +102,42 @@ class EdgeServer():
             #        self.tb.add_scalar(self.id + '.Eval.' + k + '.F1', 100*v['F1'], self.fed_cnt)
 
             #log_info = "[Edge FL: %d] [%s.FL.Eval.mIoU: %.3f%%, %s.FL.Eval.mPrecision: %.3f%%, %s.FL.Eval.mRecall: %.3f%%, %s.FL.Eval.mF1: %.3f%%]" % (self.fed_cnt, self.id, 100*dicts['mIoU'], self.id, 100*dicts['mPrecision'], self.id, 100*dicts['mRecall'], self.id, 100*dicts['mF1'])
-            #print(log_info)
+            clsdicts, catdicts, eval_loss = SS_Evaluate(self.model, test_dataloader, self.dev)
+            self.tb.add_scalar('%s.Eval.Loss' % self.id, eval_loss, self.fed_cnt)
+            for k, v in clsdicts.items():
+                if k == 'mIoU':
+                    self.tb.add_scalar('%s.Eval.Class.mIoU' % self.id, 100*v, self.fed_cnt)
+                elif k == 'mPrecision':
+                    self.tb.add_scalar('%s.Eval.Class.mPrecision' % self.id, 100*v, self.fed_cnt)
+                elif k == 'mRecall':
+                    self.tb.add_scalar('%s.Eval.Class.mRecall' % self.id, 100*v, self.fed_cnt)
+                elif k == 'mF1':
+                    self.tb.add_scalar('%s.Eval.Class.mF1' % self.id, 100*v, self.fed_cnt)
+                else:
+                    self.tb.add_scalar(self.id + '.Eval.Class.' + k + '.IoU', 100*v['IoU'], self.fed_cnt)
+                    self.tb.add_scalar(self.id + '.Eval.Class.' + k + '.Precision', 100*v['Precision'], self.fed_cnt)
+                    self.tb.add_scalar(self.id + '.Eval.Class.' + k + '.Recall', 100*v['Recall'], self.fed_cnt)
+                    self.tb.add_scalar(self.id + '.Eval.Class.' + k + '.F1', 100*v['F1'], self.fed_cnt)
+
+            for k, v in catdicts.items():
+                if k == 'mIoU':
+                    self.tb.add_scalar('%s.Eval.Category.mIoU', 100*v, self.fed_cnt)
+                elif k == 'mPrecision':
+                    self.tb.add_scalar('%s.Eval.Category.mPrecision', 100*v, self.fed_cnt)
+                elif k == 'mRecall':
+                    self.tb.add_scalar('%s.Eval.Category.mRecall', 100*v, self.fed_cnt)
+                elif k == 'mF1':
+                    self.tb.add_scalar('%s.Eval.Category.mF1', 100*v, self.fed_cnt)
+                else:
+                    self.tb.add_scalar(self.id + '.Eval.Category.' + k + '.IoU', 100*v['IoU'], self.fed_cnt)
+                    self.tb.add_scalar(self.id + '.Eval.Category.' + k + '.Precision', 100*v['Precision'], self.fed_cnt)
+                    self.tb.add_scalar(self.id + '.Eval.Category.' + k + '.Recall', 100*v['Recall'], self.fed_cnt)
+                    self.tb.add_scalar(self.id + '.Eval.Category.' + k + '.F1', 100*v['F1'], self.fed_cnt)
+
+            log_cls_info = "[Edge FL: %d] [%s.FL.Eval.Class.mIoU: %.2f%%, %s.FL.Eval.Class.mPrecision: %.2f%%, %s.FL.Eval.Class.mRecall: %.2f%%, %s.FL.Eval.Class.mF1: %.2f%%]" % (self.fed_cnt, self.id, 100*clsdicts['mIoU'], self.id, 100*clsdicts['mPrecision'], self.id, 100*clsdicts['mRecall'], self.id, 100*clsdicts['mF1'])
+            log_cat_info = "[Edge FL: %d] [%s.FL.Eval.Category.mIoU: %.2f%%, %s.FL.Eval.Category.mPrecision: %.2f%%, %s.FL.Eval.Category.mRecall: %.2f%%, %s.FL.Eval.Category.mF1: %.2f%%]" % (self.fed_cnt, self.id, 100*catdicts['mIoU'], self.id, 100*catdicts['mPrecision'], self.id, 100*catdicts['mRecall'], self.id, 100*catdicts['mF1'])
+            print(log_cls_info)
+            print(log_cat_info)
         elif self.task == 'objDect':
             num_val = 0
             val_lines = None
@@ -240,10 +275,11 @@ class CloudServer():
                                          shuffle=True,
                                          num_workers=1)
 
-            clsdicts, catdicts = SS_Evaluate(self.model, test_dataloader, self.dev)
+            clsdicts, catdicts, eval_loss = SS_Evaluate(self.model, test_dataloader, self.dev)
+            self.tb.add_scalar('Cloud.Eval.Loss' % self.id, eval_loss, self.fed_cnt)
             for k, v in clsdicts.items():
                 if k == 'mIoU':
-                    self.tb.add_scalar('Cloud.Eval.Class.mIOU', 100*v, self.fed_cnt)
+                    self.tb.add_scalar('Cloud.Eval.Class.mIoU', 100*v, self.fed_cnt)
                 elif k == 'mPrecision':
                     self.tb.add_scalar('Cloud.Eval.Class.mPrecision', 100*v, self.fed_cnt)
                 elif k == 'mRecall':
@@ -258,7 +294,7 @@ class CloudServer():
 
             for k, v in catdicts.items():
                 if k == 'mIoU':
-                    self.tb.add_scalar('Cloud.Eval.Category.mIOU', 100*v, self.fed_cnt)
+                    self.tb.add_scalar('Cloud.Eval.Category.mIoU', 100*v, self.fed_cnt)
                 elif k == 'mPrecision':
                     self.tb.add_scalar('Cloud.Eval.Category.mPrecision', 100*v, self.fed_cnt)
                 elif k == 'mRecall':
