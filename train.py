@@ -8,6 +8,7 @@ from model.bisenetv2 import BiSeNetV2
 from model.cracknet import CrackNet
 from model.segnet import SegNet
 from model.deeplabv3 import DeepLabv3
+from model.att_r2unet import R2AttU_Net, AttU_Net, R2U_Net, U_Net
 
 import os
 import argparse
@@ -51,7 +52,7 @@ def build_parser():
     parser.add_argument('--gpu', type=int, default=0, help='choose which GPU to use')
     parser.add_argument('--batch-size', type=int, default=8, metavar='N',
                         help='input batch size for training (default: 32)')
-    parser.add_argument('--lr', type=float, default=1e-5, metavar='LR',
+    parser.add_argument('--lr', type=float, default=1e-4, metavar='LR',
                         help='learning rate (default: 0.01)')
     parser.add_argument('--img-size', type=str, default='320,320', help='the uniform size of the resized images')
     parser.add_argument('--save-epoch', type=int, default=10, metavar='N',
@@ -85,6 +86,14 @@ if __name__ == "__main__":
         model_sel['model'] = SegNet
     elif args.model == 'DeepLabv3':
         model_sel['model'] = DeepLabv3
+    elif args.model == 'U_Net':
+        model_sel['model'] = U_Net
+    elif args.model == 'R2U_Net':
+        model_sel['model'] = R2U_Net
+    elif args.model == 'R2AttU_Net':
+        model_sel['model'] = R2AttU_Net
+    elif args.model == 'AttU_Net':
+        model_sel['model'] = AttU_Net
 
     #new_height, new_width = [int(x) for x in args.img_size.split(',')]
     #seq = iaa.Sequential([

@@ -276,7 +276,7 @@ class CloudServer():
                                          num_workers=1)
 
             clsdicts, catdicts, eval_loss = SS_Evaluate(self.model, test_dataloader, self.dev)
-            self.tb.add_scalar('Cloud.Eval.Loss' % self.id, eval_loss, self.fed_cnt)
+            self.tb.add_scalar('Cloud.Eval.Loss', eval_loss, self.fed_cnt)
             for k, v in clsdicts.items():
                 if k == 'mIoU':
                     self.tb.add_scalar('Cloud.Eval.Class.mIoU', 100*v, self.fed_cnt)
