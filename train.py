@@ -47,7 +47,7 @@ if torch.cuda.is_available():
 def build_parser():
     # Training settings
     parser = argparse.ArgumentParser(description='Semantic Segmentation')
-    parser.add_argument('--epochs', type=int, default=500, metavar='N',
+    parser.add_argument('--epochs', type=int, default=300, metavar='N',
                         help='number of epochs for training (default: 3000)')
     parser.add_argument('--gpu', type=int, default=0, help='choose which GPU to use')
     parser.add_argument('--batch-size', type=int, default=8, metavar='N',
@@ -131,7 +131,7 @@ if __name__ == "__main__":
     model = model_sel['model'](n_classes=20)
     model = model.to(device)
     model.train()
-    optimizer = optim.Adam(model.parameters(), lr=args.lr)
+    optimizer = optim.Adam(model.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay=1e-4)
     #criterion = nn.BCELoss()
     criterion = nn.CrossEntropyLoss(ignore_index=19)
 
