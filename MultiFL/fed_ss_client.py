@@ -16,7 +16,7 @@ from model.cracknet import CrackNet
 from model.segnet import SegNet
 from model.deeplabv3 import DeepLabv3
 
-from data import Dataset 
+from data import Dataset
 from config import *
 from utils.average_meter import AverageMeter
 from utils.util_semseg import SS_Evaluate
@@ -29,7 +29,7 @@ class SemSegClient():
         self.tb = tensorboard
         self.dev = dev
         self.clients_dict = clients_dict
-        self.time_str = time_str 
+        self.time_str = time_str
 
         self.model = self.config['model']().to(self.dev)
         self.model_train     = self.model.train()
@@ -37,12 +37,13 @@ class SemSegClient():
             self.model_train = torch.nn.DataParallel(self.model_train)
             cudnn.benchmark = True
             self.model_train = self.model_train.cuda()
+        self.fedprox_model = copy.deepcopy(self.model)
 
         self.batch_size = self.config[self.eid][self.cid]['batch_size']
         self.lr = self.config[self.eid][self.cid]['lr']
         self.betas = self.config[self.eid][self.cid]['betas']
         self.weight_decay = self.config[self.eid][self.cid]['weight_decay']
-        self.epochs = self.config['global_round'] * self.config['EAI'] * self.config['CAI'] 
+        self.epochs = self.config['global_round'] * self.config['EAI'] * self.config['CAI']
 
         self.updated_model = None
         self.epoch_cnt = 0
@@ -69,6 +70,7 @@ class SemSegClient():
         for epoch in range(self.config['EAI']):
             if self.updated_model is not None:
                 self.model.load_state_dict(self.updated_model)
+                self.fedprox_model.load_state_dict(self.updated_model)
                 self.updated_model = None
 
             self.model.train()
@@ -81,6 +83,13 @@ class SemSegClient():
                 dist = [self.criterion(pred_mask, masks.to(self.dev)) for pred_mask in pred_masks]
                 dist = sum(dist)
                 self.optim.zero_grad()
+
+                proximal_term = 0.0
+                for w, w_t in zip(self.model.parameters(), self.fedprox_model.parameters()):
+                    proximal_term += (w - w_t).norm(2)
+
+                dist += 0.005 / 2 * proximal_term
+
                 dist.backward()
                 loss.update(dist.item())
                 self.optim.step()
