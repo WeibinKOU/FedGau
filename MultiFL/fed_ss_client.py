@@ -38,6 +38,15 @@ class SemSegClient():
             cudnn.benchmark = True
             self.model_train = self.model_train.cuda()
         self.fedprox_model = copy.deepcopy(self.model)
+        self.mu = 0.005 #0: fedavg, float[0,1]: fedprox/feddyn
+        self.beta = 1  #0: fedavg/fedprox, 1:feddyn
+
+        self.prev_grads = None
+        for param in self.model.parameters():
+            if not isinstance(self.prev_grads, torch.Tensor):
+                self.prev_grads = torch.zeros_like(param.view(-1))
+            else:
+                self.prev_grads = torch.cat((self.prev_grads, torch.zeros_like(param.view(-1))), dim=0)
 
         self.batch_size = self.config[self.eid][self.cid]['batch_size']
         self.lr = self.config[self.eid][self.cid]['lr']
@@ -88,11 +97,29 @@ class SemSegClient():
                 for w, w_t in zip(self.model.parameters(), self.fedprox_model.parameters()):
                     proximal_term += (w - w_t).norm(2)
 
-                dist += 0.005 / 2 * proximal_term
+                dist += self.mu / 2 * proximal_term
+
+                lin_penalty = 0.0
+                curr_params = None
+                for name, param in self.model.named_parameters():
+                    if not isinstance(curr_params, torch.Tensor):
+                        curr_params = param.view(-1)
+                    else:
+                        curr_params = torch.cat((curr_params, param.view(-1)), dim=0)
+
+                lin_penalty = torch.sum(curr_params * self.prev_grads)
+                dist -= self.beta * lin_penalty
 
                 dist.backward()
                 loss.update(dist.item())
                 self.optim.step()
+
+                self.prev_grads = None
+                for param in self.model.parameters():
+                    if not isinstance(self.prev_grads, torch.Tensor):
+                        self.prev_grads = param.grad.view(-1).clone()
+                    else:
+                        self.prev_grads = torch.cat((self.prev_grads, param.grad.view(-1).clone()), dim=0)
 
             cid = "%s.%s" % (self.eid, self.cid)
             log_info = "[Epoch: %d/%d] [%s.Train.Loss: %f]" % (self.epoch_cnt, self.epochs, cid, loss.avg)
