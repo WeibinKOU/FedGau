@@ -12,6 +12,7 @@ sys.path.append("../")
 from .fed_ss_client import SemSegClient
 from .fed_od_client import ObjDectClient
 from .fed_cla_client import ClassiClient
+from .fed_adaptive_optimizer import adaptiveOptimizer
 
 from model.bisenetv2 import BiSeNetV2
 from model.cracknet import CrackNet
@@ -37,6 +38,12 @@ class EdgeServer():
         self.dev = dev
         self.logdir = self.config['logdir']
         self.time_str = time_str
+        self.eval_loss = 0.0
+        self.eval_loss_diff = 0.0
+        self.delta_e = 0.0
+        self.rho = 0.0
+        self.beta = 0.0
+        self.grad = None
 
         if self.task == 'semSeg':
             self.model = self.config['model']().to(self.dev)
@@ -102,8 +109,9 @@ class EdgeServer():
             #        self.tb.add_scalar(self.id + '.Eval.' + k + '.F1', 100*v['F1'], self.fed_cnt)
 
             #log_info = "[Edge FL: %d] [%s.FL.Eval.mIoU: %.3f%%, %s.FL.Eval.mPrecision: %.3f%%, %s.FL.Eval.mRecall: %.3f%%, %s.FL.Eval.mF1: %.3f%%]" % (self.fed_cnt, self.id, 100*dicts['mIoU'], self.id, 100*dicts['mPrecision'], self.id, 100*dicts['mRecall'], self.id, 100*dicts['mF1'])
-            clsdicts, catdicts, eval_loss = SS_Evaluate(self.model, test_dataloader, self.dev)
-            self.tb.add_scalar('%s.Eval.Loss' % self.id, eval_loss, self.fed_cnt)
+            clsdicts, catdicts, self.eval_loss = SS_Evaluate(self.model, test_dataloader, self.dev)
+            self.tb.add_scalar('%s.Eval.Loss' % self.id, self.eval_loss, self.fed_cnt)
+
             for k, v in clsdicts.items():
                 if k == 'mIoU':
                     self.tb.add_scalar('%s.Eval.Class.mIoU' % self.id, 100*v, self.fed_cnt)
@@ -138,6 +146,20 @@ class EdgeServer():
             log_cat_info = "[Edge FL: %d] [%s.FL.Eval.Category.mIoU: %.2f%%, %s.FL.Eval.Category.mPrecision: %.2f%%, %s.FL.Eval.Category.mRecall: %.2f%%, %s.FL.Eval.Category.mF1: %.2f%%]" % (self.fed_cnt, self.id, 100*catdicts['mIoU'], self.id, 100*catdicts['mPrecision'], self.id, 100*catdicts['mRecall'], self.id, 100*catdicts['mF1'])
             print(log_cls_info)
             print(log_cat_info)
+
+            aggted_loss = sum([self.config[self.id]['Agent' + str(i)]['agg_coef'] * self.clients[i].eval_loss for i in range(len(self.clients))])
+            self.delta_e = sum([self.config[self.id]['Agent' + str(i)]['agg_coef'] * self.clients[i].delta_ce for i in range(len(self.clients))])
+            self.rho = sum([self.config[self.id]['Agent' + str(i)]['agg_coef'] * self.clients[i].rho for i in range(len(self.clients))])
+            self.beta = sum([self.config[self.id]['Agent' + str(i)]['agg_coef'] * self.clients[i].beta for i in range(len(self.clients))])
+            self.grad = sum([self.config[self.id]['Agent' + str(i)]['agg_coef'] * self.clients[i].grad for i in range(len(self.clients))], torch.zeros_like(self.clients[0].grad))
+            self.eval_loss_diff = self.eval_loss - aggted_loss
+
+            self.tb.add_scalar(self.id + '.Optim.AggregatedLoss', aggted_loss, self.fed_cnt)
+            self.tb.add_scalar(self.id + '.Optim.GradDelta', self.delta_e, self.fed_cnt)
+            self.tb.add_scalar(self.id + '.Optim.Rho', self.rho, self.fed_cnt)
+            self.tb.add_scalar(self.id + '.Optim.Beta', self.beta, self.fed_cnt)
+            self.tb.add_scalar(self.id + '.Optim.GradNorm', np.sqrt(self.grad.norm(2).item()), self.fed_cnt)
+            self.tb.add_scalar(self.id + '.Optim.LossDiff', self.eval_loss_diff, self.fed_cnt)
         elif self.task == 'objDect':
             num_val = 0
             val_lines = None
@@ -215,6 +237,13 @@ class CloudServer():
         self.tb = SummaryWriter(self.logdir + '/' + self.task + '/' + self.time_str + '/' + logruns)
 
         self.fed_cnt = 0
+        self.hetero_ce = 0.0
+        self.hetero_eg = 0.0
+        self.delta = 0.0
+        self.rho = 0.0
+        self.beta = 0.0
+        self.grad = None
+        self.optimizer = adaptiveOptimizer(self.edges_num, self.config)
 
         self.edges = []
         for i in range(self.edges_num):
@@ -311,6 +340,46 @@ class CloudServer():
             log_cat_info = "[Cloud FL: %d] [Cloud.FL.Eval.Category.mIoU: %.2f%%, Cloud.FL.Eval.Category.mPrecision: %.2f%%, Cloud.FL.Eval.Category.mRecall: %.2f%%, Cloud.FL.Eval.Category.mF1: %.2f%%]" % (self.fed_cnt, 100*catdicts['mIoU'], 100*catdicts['mPrecision'], 100*catdicts['mRecall'], 100*catdicts['mF1'])
             print(log_cls_info)
             print(log_cat_info)
+
+            self.hetero_eg = eval_loss - sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].eval_loss for i in range(len(self.edges)))
+            self.hetero_eg = self.hetero_eg.item()
+            self.hetero_ce = sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].eval_loss_diff for i in range(len(self.edges)))
+            self.hetero_ce = self.hetero_ce.item()
+            self.delta = sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].delta_e for i in range(len(self.edges)))
+            self.rho = sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].rho for i in range(len(self.edges)))
+            self.beta = sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].beta for i in range(len(self.edges)))
+            self.grad = sum([self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].grad for i in range(len(self.edges))], torch.zeros_like(self.edges[0].grad))
+            self.grad = self.grad.norm(2).item()
+            optim_theta = min([1, abs(self.hetero_ce / self.hetero_eg)])
+
+            self.tb.add_scalar('Cloud.Optim.Hetero_EG', self.hetero_eg, self.fed_cnt)
+            self.tb.add_scalar('Cloud.Optim.Hetero_CE', self.hetero_ce, self.fed_cnt)
+            self.tb.add_scalar('Cloud.Optim.AdaptiveFactor', optim_theta, self.fed_cnt)
+            self.tb.add_scalar('Cloud.Optim.GradDelta', self.delta, self.fed_cnt)
+            self.tb.add_scalar('Cloud.Optim.GradNorm', np.sqrt(self.grad), self.fed_cnt)
+            self.tb.add_scalar('Cloud.Optim.Rho', self.rho, self.fed_cnt)
+            self.tb.add_scalar('Cloud.Optim.Beta', self.beta, self.fed_cnt)
+
+            self.optimizer.theta = optim_theta
+            self.optimizer.beta = self.beta
+            self.optimizer.rho = self.rho
+            self.optimizer.delta = self.delta
+            self.optimizer.delta_e.clear()
+            for i in range(len(self.edges)):
+                self.optimizer.delta_e.append(self.edges[i].delta_e)
+            self.optimizer.grad_norm2.append(self.grad)
+            eai, cai, estiC = self.optimizer.solve()
+            self.tb.add_scalar('Cloud.Optim.EstimC', estiC, self.fed_cnt)
+            if 'enable_optim' in self.config and self.config['enable_optim'] == True:
+                self.config['EAI'] = eai
+                self.config['CAI'] = cai
+                for edge in self.edges:
+                    edge.config['EAI'] = eai
+                    edge.config['CAI'] = cai
+                    for client in edge.clients:
+                        client.config['EAI'] = eai
+                        client.config['CAI'] = cai
+
         elif self.task == 'objDect':
             num_val = 0
             val_lines = None
