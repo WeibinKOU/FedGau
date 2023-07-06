@@ -6,7 +6,7 @@ class adaptiveOptimizer():
         self.config = config
         self.eta = config['Edge0']['Agent0']['lr']
         self.glb_rds = 50
-        self.iter_per_rd = 6
+        self.iter_per_rd = config['EAI'] * config['CAI']
         self.rho = 0.0 #rho-Lipschitz
         self.beta = 0.0 #beta-smooth
         self.theta = 0.0 #performance adapter

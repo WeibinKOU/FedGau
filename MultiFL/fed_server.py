@@ -369,8 +369,7 @@ class CloudServer():
                 self.optimizer.delta_e.append(self.edges[i].delta_e)
             self.optimizer.grad_norm2.append(self.grad)
             eai, cai, estiC = self.optimizer.solve()
-            self.tb.add_scalar('Cloud.Optim.EstimC', estiC, self.fed_cnt)
-            if 'enable_optim' in self.config and self.config['enable_optim'] == True:
+            if 'enable_optim' in self.config and self.config['enable_optim']:
                 self.config['EAI'] = eai
                 self.config['CAI'] = cai
                 for edge in self.edges:
@@ -379,6 +378,10 @@ class CloudServer():
                     for client in edge.clients:
                         client.config['EAI'] = eai
                         client.config['CAI'] = cai
+
+            self.tb.add_scalar('Cloud.Optim.EstimC', estiC, self.fed_cnt)
+            self.tb.add_scalar('Cloud.Optim.EAI', self.config['EAI'], self.fed_cnt)
+            self.tb.add_scalar('Cloud.Optim.CAI', self.config['CAI'], self.fed_cnt)
 
         elif self.task == 'objDect':
             num_val = 0
