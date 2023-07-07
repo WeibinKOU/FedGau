@@ -341,6 +341,9 @@ class CloudServer():
             print(log_cls_info)
             print(log_cat_info)
 
+            traffic = 2 * (self.config['CAI'] * sum([len(edge.clients) for edge in self.edges]) + len(self.edges))
+            self.tb.add_scalar('Cloud.Traffic', traffic, self.fed_cnt)
+
             self.hetero_eg = eval_loss - sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].eval_loss for i in range(len(self.edges)))
             self.hetero_eg = self.hetero_eg.item()
             self.hetero_ce = sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].eval_loss_diff for i in range(len(self.edges)))
