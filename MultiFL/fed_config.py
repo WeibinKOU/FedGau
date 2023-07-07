@@ -10,90 +10,103 @@ import torch.nn.functional as F
 
 from utils.func import *
 
-WIDTH=640
-HEIGHT=1280
+WIDTH=1280
+HEIGHT=640
 
 task = 'semSeg' #alternatives: semSeg, objDect, classification
 semSeg = {
         'Edge0' : #Northern Germany
         {
-            'agg_coef': 0.363,
+            #'agg_coef': 0.363, #cityscapes ratio
+            'agg_coef': 0.41, #cityscapes bd
+            #'agg_coef': 1.0, #cityscapes centralized
             'Agent0' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client4/',
-                'lr': 0.0003,
+                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/centralized/',
+                'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.535,
+                #'agg_coef': 0.535, #cityscapes ratio
+                'agg_coef': 0.41, #cityscapes bd
+                #'agg_coef': 1.0, #cityscapes centralized
             },
 
             'Agent1' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client6/',
-                'lr': 0.0003,
+                'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.265,
+                #'agg_coef': 0.265, #cityscapes ratio
+                'agg_coef': 0.44, #cityscapes bd
             },
 
             'Agent2' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client7/',
-                'lr': 0.0003,
+                'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.201,
+                #'agg_coef': 0.201, #cityscapes ratio
+                'agg_coef': 0.15, #cityscapes bd
             },
         },
 
         'Edge1': # Rhine-Ruhr Region
         {
-            'agg_coef': 0.352,
+            #'agg_coef': 0.352, #cityscapes ratio
+            'agg_coef': 0.11, #cityscapes bd
             'Agent0' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client1/',
-                'lr': 0.0003,
+                'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.560,
+                #'agg_coef': 0.560, #cityscapes ratio
+                'agg_coef': 0.61, #cityscapes bd
             },
 
             'Agent1' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client2/',
-                'lr': 0.0003,
+                'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.440,
+                #'agg_coef': 0.440, #cityscapes ratio
+                'agg_coef': 0.39, #cityscapes bd
             },
         },
 
         'Edge2': #Western Germany - Cental
         {
-            'agg_coef': 0.285,
+            #'agg_coef': 0.285, #cityscapes ratio
+            'agg_coef': 0.48, #cityscapes bd
             'Agent0' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client3/',
-                'lr': 0.0003,
+                'lr': 0.0001,
                 'batch_size': 8,
                'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.652,
+                #'agg_coef': 0.652, #cityscapes ratio
+                'agg_coef': 0.90, #cityscapes bd
             },
 
             'Agent1' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client5/',
-                'lr': 0.0003,
+                'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.348,
+                #'agg_coef': 0.348, #cityscapes ratio
+                'agg_coef': 0.10, #cityscapes bd
             }
         },
 
@@ -108,6 +121,7 @@ semSeg = {
         'EAI': 3,
         'CAI': 2,
         'GPU_ID': 0,
+        'enable_optim': True,
         'logdir': '/home/wbkou/AAAI/HFL-DynaCoeffi/logs'
 }
 

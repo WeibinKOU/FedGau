@@ -39,8 +39,8 @@ class SemSegClient():
             cudnn.benchmark = True
             self.model_train = self.model_train.cuda()
         self.fedprox_model = copy.deepcopy(self.model)
-        self.mu = 0.005 #0: fedavg, float[0,1]: fedprox/feddyn
-        self.beta = 1  #0: fedavg/fedprox, 1:feddyn
+        self.mu = 0.0  #0: fedavg/fedstats, float[0,1]: fedprox/feddyn
+        self.beta = 0.0  #0: fedavg/fedstats/fedprox, 1:feddyn
 
         self.prev_grads = None
         for param in self.model.parameters():

@@ -373,6 +373,7 @@ class CloudServer():
             self.optimizer.grad_norm2.append(self.grad)
             eai, cai, estiC = self.optimizer.solve()
             if 'enable_optim' in self.config and self.config['enable_optim']:
+                print('Optimized Result (EAI, CAI):', eai, cai)
                 self.config['EAI'] = eai
                 self.config['CAI'] = cai
                 for edge in self.edges:
