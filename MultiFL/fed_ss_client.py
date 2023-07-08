@@ -32,15 +32,58 @@ class SemSegClient():
         self.clients_dict = clients_dict
         self.time_str = time_str
 
-        self.model = self.config['model']().to(self.dev)
+        if self.config['dataset'] == 'cityscapes':
+            self.dataset = Dataset(self.config[self.eid][self.cid]['dataset'], num_classes=20)
+            self.test_dataset = Dataset(self.config['test']['dataset'], num_classes=20, type_='test')
+            self.criterion = nn.CrossEntropyLoss(ignore_index=19).to(self.dev)
+            self.model = self.config['model'](n_classes=20).to(self.dev)
+        elif self.config['dataset'] == 'Mapillary':
+            self.dataset = Dataset(self.config[self.eid][self.cid]['dataset'], num_classes=66)
+            self.test_dataset = Dataset(self.config['test']['dataset'], num_classes=66, type_='test')
+            self.criterion = nn.CrossEntropyLoss(ignore_index=66).to(self.dev)
+            self.model = self.config['model'](n_classes=66).to(self.dev)
+        else:
+            print('Dataset %s is not supported!'%self.config['dataset'])
+            exit()
+
         self.model_train     = self.model.train()
         if torch.cuda.is_available():
             self.model_train = torch.nn.DataParallel(self.model_train)
             cudnn.benchmark = True
             self.model_train = self.model_train.cuda()
         self.fedprox_model = copy.deepcopy(self.model)
-        self.mu = 0.0  #0: fedavg/fedstats, float[0,1]: fedprox/feddyn
-        self.beta = 0.0  #0: fedavg/fedstats/fedprox, 1:feddyn
+
+        if 'FedAlgo' not in self.config:
+            self.mu = 0.0
+            self.beta = 0.0
+        elif self.config['FedAlgo'] == 'FedAvg' or self.config['FedAlgo'] == 'FedStats':
+            self.mu = 0.0
+            self.beta = 0.0
+        elif self.config['FedAlgo'] == 'FedProx':
+            self.mu = 0.01
+            self.beta = 0.0
+        elif self.config['FedAlgo'] == 'FedDyn':
+            self.mu = 0.01
+            self.beta = 1.0
+
+        self.prev_grads = None
+        for param in self.model.parameters():
+            if not isinstance(self.prev_grads, torch.Tensor):
+                self.prev_grads = torch.zeros_like(param.view(-1))
+            else:
+                self.prev_grads = torch.cat((self.prev_grads, torch.zeros_like(param.view(-1))), dim=0)
+
+        self.batch_size = self.config[self.eid][self.cid]['batch_size']
+        self.lr = self.config[self.eid][self.cid]['lr']
+        self.betas = self.config[self.eid][self.cid]['betas']
+        self.weight_decay = self.config[self.eid][self.cid]['weight_decay']
+        self.epochs = self.config['global_round'] * self.config['EAI'] * self.config['CAI']
+
+        self.updated_model = None
+        self.epoch_cnt = 0
+        self.eval_loss = 0.0
+        self.delta_ce = 0.0
+        self.rho = 0.0
 
         self.prev_grads = None
         for param in self.model.parameters():
@@ -63,15 +106,10 @@ class SemSegClient():
         self.beta = 0.0
         self.grad = None
 
-        #self.criterion = nn.BCELoss().to(self.dev)
-        self.criterion = nn.CrossEntropyLoss(ignore_index=19).to(self.dev)
-
-        self.dataset = Dataset(self.config[self.eid][self.cid]['dataset'])
         self.dataloader = DataLoader(self.dataset,
             batch_size=self.batch_size,
             shuffle=True,
             num_workers=1, drop_last=True)
-        self.test_dataset = Dataset(self.config['test']['dataset'], type_='test')
         self.test_dataloader = DataLoader(self.test_dataset,
                                      batch_size=self.config['test']['batch_size'],
                                      shuffle=True,
@@ -141,36 +179,25 @@ class SemSegClient():
             cid = "%s.%s" % (self.eid, self.cid)
             log_info = "[Epoch: %d/%d] [%s.Train.Loss: %f]" % (self.epoch_cnt, self.epochs, cid, loss.avg)
             print(log_info)
-
             self.tb.add_scalar(cid + '.Train.Loss', loss.avg, self.epoch_cnt)
-            '''
-            if self.epoch_cnt % 5 == 0:
-                avg_iou, avg_pre, avg_recall, avg_f1 = SS_Evaluate(self.model, self.test_dataloader, self.dev)
-                self.tb.add_scalar(cid + '.Eval.AvgIOU', avg_iou, self.epoch_cnt)
-                self.tb.add_scalar(cid + '.Eval.AvgPrecision', avg_pre, self.epoch_cnt)
-                self.tb.add_scalar(cid + '.Eval.AvgRecall', avg_recall, self.epoch_cnt)
-                self.tb.add_scalar(cid + '.Eval.AvgF1', avg_f1, self.epoch_cnt)
-                log_info = "[Epoch: %d/%d] [%s.Eval.AvgIOU: %f, %s.Eval.AvgPrecision: %f, %s.Eval.AvgRecall: %f, %s.Eval.AvgF1: %f]" % (self.epoch_cnt, self.epochs, cid, avg_iou, cid, avg_pre, cid, avg_recall, cid, avg_f1)
-                print(log_info)
-            '''
-
             self.epoch_cnt += 1
 
             if epoch == self.config['EAI'] - 1:
                 self.clients_dict[self.cid] = self.model.state_dict()
-                self.model.eval()
-                self.fedprox_model.eval()
-                _, _, self.eval_loss = SS_Evaluate(self.model, self.test_dataloader, self.dev)
-                _, _, eval_loss = SS_Evaluate(self.fedprox_model, self.test_dataloader, self.dev)
-                self.rho = abs(self.eval_loss - eval_loss) / (math.sqrt(diff_term) + 1e-6)
-                self.rho = self.rho.item()
+                if 'enable_optim' in self.config and self.config['enable_optim']:
+                    self.model.eval()
+                    self.fedprox_model.eval()
+                    _, _, self.eval_loss = SS_Evaluate(self.model, self.test_dataloader, self.dev, self.config['dataset'])
+                    _, _, eval_loss = SS_Evaluate(self.fedprox_model, self.test_dataloader, self.dev, self.config['dataset'])
+                    self.rho = abs(self.eval_loss - eval_loss) / (math.sqrt(diff_term) + 1e-6)
+                    self.rho = self.rho.item()
 
-                grad_diff = None
-                for param_c, param_e in zip(self.model.parameters(), self.fedprox_model.parameters()):
-                    if not isinstance(grad_diff, torch.Tensor):
-                        grad_diff = (param_c.grad - param_e.grad).view(-1).clone()
-                    else:
-                        grad_diff = torch.cat((grad_diff, (param_c.grad - param_e.grad).view(-1).clone()), dim=0)
-                self.delta_ce = math.sqrt(grad_diff.norm(2).item())
-                self.beta = self.delta_ce / (math.sqrt(diff_term) + 1e-6)
-                del grad_diff
+                    grad_diff = None
+                    for param_c, param_e in zip(self.model.parameters(), self.fedprox_model.parameters()):
+                        if not isinstance(grad_diff, torch.Tensor):
+                            grad_diff = (param_c.grad - param_e.grad).view(-1).clone()
+                        else:
+                            grad_diff = torch.cat((grad_diff, (param_c.grad - param_e.grad).view(-1).clone()), dim=0)
+                    self.delta_ce = math.sqrt(grad_diff.norm(2).item())
+                    self.beta = self.delta_ce / (math.sqrt(diff_term) + 1e-6)
+                    del grad_diff

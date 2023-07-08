@@ -10,56 +10,59 @@ import torch.nn.functional as F
 
 from utils.func import *
 
-WIDTH=1280
-HEIGHT=640
+#WIDTH=1280 #cityscapes
+#HEIGHT=640 #cityscapes
+
+WIDTH=960 #Mapillary
+HEIGHT=720 #Mapillary
 
 task = 'semSeg' #alternatives: semSeg, objDect, classification
 semSeg = {
         'Edge0' : #Northern Germany
         {
             #'agg_coef': 0.363, #cityscapes fedavg
-            'agg_coef': 0.41, #cityscapes fedstats
-            #'agg_coef': 0.41, #Mapillary fedavg
+            #'agg_coef': 0.41, #cityscapes fedstats
+            'agg_coef': 0.41, #Mapillary fedavg
             #'agg_coef': 0.45, #Mapillary fedstats
             'Agent0' :
             {
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client4/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client4/',
+                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client4/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client4/',
                 'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 #'agg_coef': 0.535, #cityscapes fedavg
-                'agg_coef': 0.41, #cityscapes fedstats
-                #'agg_coef': 0.58, #Mapillary fedavg
+                #'agg_coef': 0.41, #cityscapes fedstats
+                'agg_coef': 0.58, #Mapillary fedavg
                 #'agg_coef': 0.79, #Mapillary fedstats
             },
 
             'Agent1' :
             {
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client6/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client6/',
+                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client6/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client6/',
                 'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 #'agg_coef': 0.265, #cityscapes fedavg
-                'agg_coef': 0.44, #cityscapes fedstats
-                #'agg_coef': 0.11, #Mapillary fedavg
+                #'agg_coef': 0.44, #cityscapes fedstats
+                'agg_coef': 0.11, #Mapillary fedavg
                 #'agg_coef': 0.05, #Mapillary fedstats
             },
 
             'Agent2' :
             {
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client7/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client7/',
+                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client7/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client7/',
                 'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 #'agg_coef': 0.201, #cityscapes fedavg
-                'agg_coef': 0.15, #cityscapes fedstats
-                #'agg_coef': 0.31, #Mapillary fedavg
+                #'agg_coef': 0.15, #cityscapes fedstats
+                'agg_coef': 0.31, #Mapillary fedavg
                 #'agg_coef': 0.16, #Mapillary festats
             },
         },
@@ -67,34 +70,34 @@ semSeg = {
         'Edge1': # Rhine-Ruhr Region
         {
             #'agg_coef': 0.352, #cityscapes fedavg
-            'agg_coef': 0.11, #cityscapes festats
-            #'agg_coef': 0.24, #Mapillary fedavg
+            #'agg_coef': 0.11, #cityscapes festats
+            'agg_coef': 0.24, #Mapillary fedavg
             #'agg_coef': 0.20, #Mapillary fedstats
             'Agent0' :
             {
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client1/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client1/',
+                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client1/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client1/',
                 'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 #'agg_coef': 0.560, #cityscapes fedavg
-                'agg_coef': 0.61, #cityscapes fedstats
-                #'agg_coef': 0.77, #Mapillary fesavg
+                #'agg_coef': 0.61, #cityscapes fedstats
+                'agg_coef': 0.77, #Mapillary fesavg
                 #'agg_coef': 0.94, #Mapillary fedstats
             },
 
             'Agent1' :
             {
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client2/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client2/',
+                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client2/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client2/',
                 'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 #'agg_coef': 0.440, #cityscapes fedavg
-                'agg_coef': 0.39, #cityscapes fedstats
-                #'agg_coef': 0.23, #Mapillary fedavg
+                #'agg_coef': 0.39, #cityscapes fedstats
+                'agg_coef': 0.23, #Mapillary fedavg
                 #'agg_coef': 0.06, #Mapillary fedstats
             },
         },
@@ -102,51 +105,53 @@ semSeg = {
         'Edge2': #Western Germany - Cental
         {
             #'agg_coef': 0.285, #cityscapes fedavg
-            'agg_coef': 0.48, #cityscapes fedstats
-            #'agg_coef': 0.35, #Mapillary fedavg
+            #'agg_coef': 0.48, #cityscapes fedstats
+            'agg_coef': 0.35, #Mapillary fedavg
             #'agg_coef': 0.35, #Mapillary fedstats
             'Agent0' :
             {
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client3/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client3/',
+                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client3/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client3/',
                 'lr': 0.0001,
                 'batch_size': 8,
                'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 #'agg_coef': 0.652, #cityscapes fedavg
-                'agg_coef': 0.90, #cityscapes fedstats
-                #'agg_coef': 0.29, #Mapillary fedavg
+                #'agg_coef': 0.90, #cityscapes fedstats
+                'agg_coef': 0.29, #Mapillary fedavg
                 #'agg_coef': 0.12, #Mapillary fedstats
             },
 
             'Agent1' :
             {
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client5/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client5/',
+                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client5/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client5/',
                 'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 #'agg_coef': 0.348, #cityscapes fedavg
-                'agg_coef': 0.10, #cityscapes fedstats
-                #'agg_coef': 0.71, #Mapillary fedavg
+                #'agg_coef': 0.10, #cityscapes fedstats
+                'agg_coef': 0.71, #Mapillary fedavg
                 #'agg_coef': 0.88, #Mapillary fedstats
             }
         },
 
         'test':
         {
-            'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/test/',
-            #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/test/',
+            #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/test/',
+            'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/test/',
             'batch_size': 8,
         },
 
         'model': DeepLabv3,
+        'dataset': 'Mapillary',  #Alternatives: Mapillary or cityscapes
         'global_round': 50,
         'EAI': 3,
         'CAI': 2,
         'GPU_ID': 0,
-        'enable_optim': True,
+        'enable_optim': False,
+        'FedAlgo': 'FedAvg', #Alternatives: FedAvg, FedProx, FedDyn and FedStats
         'logdir': '/home/wbkou/AAAI/HFL-DynaCoeffi/logs'
 }
 

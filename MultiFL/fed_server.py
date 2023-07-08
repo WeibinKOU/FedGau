@@ -46,7 +46,10 @@ class EdgeServer():
         self.grad = None
 
         if self.task == 'semSeg':
-            self.model = self.config['model']().to(self.dev)
+            if self.config['dataset'] == 'cityscapes':
+                self.model = self.config['model'](n_classes=20).to(self.dev)
+            elif self.config['dataset'] == 'Mapillary':
+                self.model = self.config['model'](n_classes=66).to(self.dev)
             self.agent = SemSegClient
         elif self.task == 'objDect':
             _, num_classes = get_classes(self.config['classes_path'])
@@ -86,30 +89,16 @@ class EdgeServer():
         self.model.load_state_dict(self.avgModel)
 
         if self.task == 'semSeg':
-            test_dataset = Dataset(self.config['test']['dataset'], type_='test')
+            if self.config['dataset'] == 'cityscapes':
+                test_dataset = Dataset(self.config['test']['dataset'], num_classes=20, type_='test')
+            elif self.config['dataset'] == 'Mapillary':
+                test_dataset = Dataset(self.config['test']['dataset'], num_classes=66, type_='test')
             test_dataloader = DataLoader(test_dataset,
                                          batch_size=self.config['test']['batch_size'],
                                          shuffle=True,
                                          num_workers=1)
 
-            #dicts= SS_Evaluate(self.model, test_dataloader, self.dev)
-            #for k, v in dicts.items():
-            #    if k == 'mIoU':
-            #        self.tb.add_scalar('%s.Eval.mIOU' % self.id, 100*v, self.fed_cnt)
-            #    elif k == 'mPrecision':
-            #        self.tb.add_scalar('%s.Eval.mPrecision' % self.id, 100*v, self.fed_cnt)
-            #    elif k == 'mRecall':
-            #        self.tb.add_scalar('%s.Eval.mRecall' % self.id, 100*v, self.fed_cnt)
-            #    elif k == 'mF1':
-            #        self.tb.add_scalar('%s.Eval.mF1' % self.id, 100*v, self.fed_cnt)
-            #    else:
-            #        self.tb.add_scalar(self.id + '.Eval.' + k + '.IoU', 100*v['IoU'], self.fed_cnt)
-            #        self.tb.add_scalar(self.id + '.Eval.' + k + '.Precision', 100*v['Precision'], self.fed_cnt)
-            #        self.tb.add_scalar(self.id + '.Eval.' + k + '.Recall', 100*v['Recall'], self.fed_cnt)
-            #        self.tb.add_scalar(self.id + '.Eval.' + k + '.F1', 100*v['F1'], self.fed_cnt)
-
-            #log_info = "[Edge FL: %d] [%s.FL.Eval.mIoU: %.3f%%, %s.FL.Eval.mPrecision: %.3f%%, %s.FL.Eval.mRecall: %.3f%%, %s.FL.Eval.mF1: %.3f%%]" % (self.fed_cnt, self.id, 100*dicts['mIoU'], self.id, 100*dicts['mPrecision'], self.id, 100*dicts['mRecall'], self.id, 100*dicts['mF1'])
-            clsdicts, catdicts, self.eval_loss = SS_Evaluate(self.model, test_dataloader, self.dev)
+            clsdicts, catdicts, self.eval_loss = SS_Evaluate(self.model, test_dataloader, self.dev, self.config['dataset'])
             self.tb.add_scalar('%s.Eval.Loss' % self.id, self.eval_loss, self.fed_cnt)
 
             for k, v in clsdicts.items():
@@ -220,7 +209,14 @@ class CloudServer():
         self.dev = torch.device('cuda:%d' % (self.config['GPU_ID']) if torch.cuda.is_available() else 'cpu')
 
         if self.task == 'semSeg':
-            self.model = self.config['model']().to(self.dev)
+            if self.config['dataset'] == 'cityscapes':
+                self.model = self.config['model'](n_classes=20).to(self.dev)
+            elif self.config['dataset'] == 'Mapillary':
+                self.model = self.config['model'](n_classes=66).to(self.dev)
+            else:
+                print('Dataset %s is not supported!'%self.config['dataset'])
+                exit()
+            print('Dataset %s is used!'%self.config['dataset'])
         elif self.task == 'objDect':
             _, num_classes = get_classes(self.config['classes_path'])
             self.model = self.config['model'](num_classes, self.config['anchors_size']).to(self.dev)
@@ -298,13 +294,16 @@ class CloudServer():
         self.model.load_state_dict(self.avgModel)
 
         if self.task == 'semSeg':
-            test_dataset = Dataset(self.config['test']['dataset'], type_='test')
+            if self.config['dataset'] == 'cityscapes':
+                test_dataset = Dataset(self.config['test']['dataset'], num_classes=20, type_='test')
+            elif self.config['dataset'] == 'Mapillary':
+                test_dataset = Dataset(self.config['test']['dataset'], num_classes=66, type_='test')
             test_dataloader = DataLoader(test_dataset,
                                          batch_size=self.config['test']['batch_size'],
                                          shuffle=True,
                                          num_workers=1)
 
-            clsdicts, catdicts, eval_loss = SS_Evaluate(self.model, test_dataloader, self.dev)
+            clsdicts, catdicts, eval_loss = SS_Evaluate(self.model, test_dataloader, self.dev, self.config['dataset'])
             self.tb.add_scalar('Cloud.Eval.Loss', eval_loss, self.fed_cnt)
             for k, v in clsdicts.items():
                 if k == 'mIoU':
@@ -371,8 +370,9 @@ class CloudServer():
             for i in range(len(self.edges)):
                 self.optimizer.delta_e.append(self.edges[i].delta_e)
             self.optimizer.grad_norm2.append(self.grad)
-            eai, cai, estiC = self.optimizer.solve()
+            estiC = 0.0
             if 'enable_optim' in self.config and self.config['enable_optim']:
+                eai, cai, estiC = self.optimizer.solve()
                 print('Optimized Result (EAI, CAI):', eai, cai)
                 self.config['EAI'] = eai
                 self.config['CAI'] = cai

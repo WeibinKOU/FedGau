@@ -61,7 +61,7 @@ def calculate_f1_score(recall, precision):
 
 Label = namedtuple('Label', [ 'name', 'id', 'trainId', 'category', 'categoryId', 'hasInstances', 'ignoreInEval', 'color',])
 
-labels = [
+cityscapes_labels = [
     #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
     Label(  'road'                 ,  7 ,        0 , 'flat'            , 1       , False        , False        , (128, 64,128) ),
     Label(  'sidewalk'             ,  8 ,        1 , 'flat'            , 1       , False        , False        , (244, 35,232) ),
@@ -85,20 +85,88 @@ labels = [
     Label(  'ignore'               , -1 ,       19 , 'void'            , 0       , False        , True         , (  0,  0,142) ),
 ]
 
-category2labels = {}
-for label in labels:
-    category = label.category
-    if category in category2labels:
-        category2labels[category].append(label)
-    else:
-        category2labels[category] = [label]
+mapillary_labels = [
+    #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
+    Label(  'Bird'                 ,  0 ,        0 , 'animal'          , 0       , True         , False         , (165, 42, 42) ),
+    Label(  'Ground Animal'        ,  1 ,        1 , 'animal'          , 0       , True         , False         , (0, 192, 0) ),
+    Label(  'Curb'                 ,  2 ,        2 , 'construction'    , 1       , False        , False         , (196, 196, 196) ),
+    Label(  'Fence'                ,  3 ,        3 , 'construction'    , 1       , False        , False         , (190, 153, 153) ),
+    Label(  'Guard Rail'           ,  4 ,        4 , 'construction'    , 1       , False        , False         , (180, 165, 180) ),
+    Label(  'Barrier'              ,  5 ,        5 , 'construction'    , 1       , False        , False         , (90, 120, 150)) ,
+    Label(  'Wall'                 ,  6 ,        6 , 'construction'    , 1       , False        , False         , (102, 102, 156)),
+    Label(  'Bike Lane'            ,  7 ,        7 , 'construction'    , 1       , False        , False         , (128, 64, 255)),
+    Label(  'Crosswalk - Plain'    ,  8 ,        8 , 'construction'    , 1       , True         , False         , (140, 140, 200)),
+    Label(  'Curb Cut'             ,  9 ,        9 , 'construction'    , 1       , False        , False         , (170, 170, 170)),
+    Label(  'Parking'              , 10 ,       10 , 'construction'    , 1       , False        , False         , (250, 170, 160)),
+    Label(  'Pedestrian Area'      , 11 ,       11 , 'construction'    , 1       , False        , False         , (96, 96, 96)),
+    Label(  'Rail Track'           , 12 ,       12 , 'construction'    , 1       , False        , False         , (230, 150, 140)),
+    Label(  'Road'                 , 13 ,       13 , 'construction'    , 1       , False        , False         , (128, 64, 128)),
+    Label(  'Service Lane'         , 14 ,       14 , 'construction'    , 1       , False        , False         , (110, 110, 110)),
+    Label(  'Sidewalk'             , 15 ,       15 , 'construction'    , 1       , False        , False         , (244, 35, 232)),
+    Label(  'Bridge'               , 16 ,       16 , 'construction'    , 1       , False        , False         , (150, 100, 100)),
+    Label(  'Building'             , 17 ,       17 , 'construction'    , 1       , False        , False         , (70, 70, 70)),
+    Label(  'Tunnel'               , 18 ,       18 , 'construction'    , 1       , False        , False         , (150, 120, 90)),
+    Label(  'Person'               , 19 ,       19 , 'human'           , 2       , True         , False         , (220, 20, 60)),
+    Label(  'Bicyclist'            , 20 ,       20 , 'human'           , 2       , True         , False         , (255, 0, 0)),
+    Label(  'Motorcyclist'         , 21 ,       21 , 'human'           , 2       , True         , False         , (255, 0, 100)),
+    Label(  'Other Rider'          , 22 ,       22 , 'human'           , 2       , True         , False         , (255, 0, 200)),
+    Label(  'LaneMarking-Crosswalk', 23 ,       23 , 'marking'         , 3       , True         , False         , (200, 128, 128)),
+    Label(  'LaneMarking-General'  , 24 ,       24 , 'marking'         , 3       , False        , False         , (255, 255, 255)),
+    Label(  'Mountain'             , 25 ,       25 , 'nature'          , 4       , False        , False         , (64, 170, 64)),
+    Label(  'Sand'                 , 26 ,       26 , 'nature'          , 4       , False        , False         , (230, 160, 50)),
+    Label(  'Sky'                  , 27 ,       27 , 'nature'          , 4       , False        , False         , (70, 130, 180)),
+    Label(  'Snow'                 , 28 ,       28 , 'nature'          , 4       , False        , False         , (190, 255, 255)),
+    Label(  'Terrain'              , 29 ,       29 , 'nature'          , 4       , False        , False         , (152, 251, 152)),
+    Label(  'Vegetation'           , 30 ,       30 , 'nature'          , 4       , False        , False         , (107, 142, 35)),
+    Label(  'Water'                , 31 ,       31 , 'nature'          , 4       , False        , False         , (0, 170, 30)),
+    Label(  'Banner'               , 32 ,       32 , 'object'          , 5       , True         , False         , (255, 255, 128)),
+    Label(  'Bench'                , 33 ,       33 , 'object'          , 5       , True         , False         , (250, 0, 30)),
+    Label(  'Bike Rack'            , 34 ,       34 , 'object'          , 5       , True         , False         , (100, 140, 180)),
+    Label(  'Billboard'            , 35 ,       35 , 'object'          , 5       , True         , False         , (220, 220, 220)),
+    Label(  'Catch Basin'          , 36 ,       36 , 'object'          , 5       , True         , False         , (220, 128, 128)),
+    Label(  'CCTV Camera'          , 37 ,       37 , 'object'          , 5       , True         , False         , (222, 40, 40)),
+    Label(  'Fire Hydrant'         , 38 ,       38 , 'object'          , 5       , True         , False         , (100, 170, 30)),
+    Label(  'Junction Box'         , 39 ,       39 , 'object'          , 5       , True         , False         , (40, 40, 40)),
+    Label(  'Mailbox'              , 40 ,       40 , 'object'          , 5       , True         , False         , (33, 33, 33)),
+    Label(  'Manhole'              , 41 ,       41 , 'object'          , 5       , True         , False         , (100, 128, 160)),
+    Label(  'Phone Booth'          , 42 ,       42 , 'object'          , 5       , True         , False         , (142, 0, 0)),
+    Label(  'Pothole'              , 43 ,       43 , 'object'          , 5       , False        , False         , (70, 100, 150)),
+    Label(  'Street Light'         , 44 ,       44 , 'object'          , 5       , True         , False         , (210, 170, 100)),
+    Label(  'Pole'                 , 45 ,       45 , 'object'          , 5       , True         , False         , (153, 153, 153)),
+    Label(  'Traffic Sign Frame'   , 46 ,       46 , 'object'          , 5       , True         , False         , (128, 128, 128)),
+    Label(  'Utility Pole'         , 47 ,       47 , 'object'          , 5       , True         , False         , (0, 0, 80)),
+    Label(  'Traffic Light'        , 48 ,       48 , 'object'          , 5       , True         , False         , (250, 170, 30)),
+    Label(  'Traffic Sign (Back)'  , 49 ,       49 , 'object'          , 5       , True         , False         , (192, 192, 192)),
+    Label(  'Traffic Sign (Front)' , 50 ,       50 , 'object'          , 5       , True         , False         , (220, 220, 0)),
+    Label(  'Trash Can'            , 51 ,       51 , 'object'          , 5       , True         , False         , (140, 140, 20)),
+    Label(  'Bicycle'              , 52 ,       52 , 'object'          , 5       , True         , False         , (119, 11, 32)),
+    Label(  'Boat'                 , 53 ,       53 , 'object'          , 5       , True         , False         , (150, 0, 255)),
+    Label(  'Bus'                  , 54 ,       54 , 'object'          , 5       , True         , False         , (0, 60, 100)),
+    Label(  'Car'                  , 55 ,       55 , 'object'          , 5       , True         , False         , (0, 0, 142)),
+    Label(  'Caravan'              , 56 ,       56 , 'object'          , 5       , True         , False         , (0, 0, 90)),
+    Label(  'Motorcycle'           , 57 ,       57 , 'object'          , 5       , True         , False         , (0, 0, 230)),
+    Label(  'On Rails'             , 58 ,       58 , 'object'          , 5       , False        , False         , (0, 80, 100)),
+    Label(  'Other Vehicle'        , 59 ,       59 , 'object'          , 5       , True         , False         , (128, 64, 64)),
+    Label(  'Trailer'              , 60 ,       60 , 'object'          , 5       , True         , False         , (0, 0, 110)),
+    Label(  'Truck'                , 61 ,       61 , 'object'          , 5       , True         , False         , (0, 0, 70)),
+    Label(  'Wheeled Slow'         , 62 ,       62 , 'object'          , 5       , True         , False         , (0, 0, 192)),
+    Label(  'Car Mount'            , 63 ,       63 , 'object'          , 5       , False        , False         , (32, 32, 32)),
+    Label(  'Ego Vehicle'          , 64 ,       64 , 'object'          , 5       , False        , False         , (120, 10, 10)),
+    Label(  'ignore'               , 65 ,       65 , 'void'            , 6       , False        , True          , (0, 0, 0))
+    ]
 
-def generateMatrix():
+def generateMatrix(labels):
+    category2labels = {}
     evalLabels = []
     for label in labels:
         evalLabels.append(label.trainId)
+        category = label.category
+        if category in category2labels:
+            category2labels[category].append(label)
+        else:
+            category2labels[category] = [label]
     maxId = max(evalLabels)
-    return evalLabels, np.zeros(shape=(maxId+1, maxId+1),dtype=np.ulonglong)
+    return evalLabels, np.zeros(shape=(maxId+1, maxId+1), dtype=np.ulonglong), category2labels
 
 def sampleEvaluate(pred_mask, gt_mask, evalLabels, confMatrix):
     predictionNp  = np.array(pred_mask)
@@ -125,28 +193,7 @@ def sampleEvaluate(pred_mask, gt_mask, evalLabels, confMatrix):
 
     return nbPixels
 
-
-def SS_calc_metric(gt_mask, pred_mask):
-    pred_mask[pred_mask >= 0.3] = 1
-    pred_mask[pred_mask < 0.3] = 0
-
-    gt_mask = gt_mask.astype(int).flatten()
-    pred_mask = pred_mask.astype(int).flatten()
-
-    #intersection = np.sum(gt_mask * pred_mask)
-    #iou = intersection / (np.sum(gt_mask + pred_mask <= 2) + 1e-6)
-    #prec = intersection / (np.sum(pred_mask == 1) + 1e-6)
-    #reca = intersection / (np.sum(gt_mask == 1) + 1e-6)
-    #f_one = 2 * prec * reca / (prec + reca + 1e-6)
-
-    iou = calculate_iou(gt_mask, pred_mask)
-    prec = calculate_precision(gt_mask, pred_mask)
-    reca = calculate_recall(gt_mask, pred_mask)
-    f_one = calculate_f1_score(prec, reca)
-
-    return iou, prec, reca, f_one
-
-def getMetricsForLabel(label, confMatrix, evalLabels):
+def getMetricsForLabel(label, confMatrix, evalLabels, labels):
     tp = np.longlong(confMatrix[label,label])
 
     fn = np.longlong(confMatrix[label,:].sum()) - tp
@@ -163,7 +210,7 @@ def getMetricsForLabel(label, confMatrix, evalLabels):
 
     return iou, pre, rec, f1
 
-def getMetricsForCategory(category, confMatrix, evalLabels):
+def getMetricsForCategory(category, confMatrix, evalLabels, labels, category2labels):
     labels_in = category2labels[category]
     labelIds = [label.trainId for label in labels_in if not label.ignoreInEval and label.trainId in evalLabels]
 
@@ -203,15 +250,20 @@ def getMetricsAvg(scoreList):
     avg_f1 = f1Sum / (validScores + 1e-6)
     return avg_iou, avg_pre, avg_rec, avg_f1
 
-def SS_Evaluate(model, dataloader, dev):
+def SS_Evaluate(model, dataloader, dev, dataset_name):
     model.eval()
     model.aux_mode = 'test'
-    cla_names = ['road', 'sidewalk', 'building', 'wall', 'fence', 'pole', 'trafficlight', 'trafficsign', 'vegetation', 'terrain', 'sky', 'person', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle', 'ignore']
+    if dataset_name == 'cityscapes':
+        cla_names = ['road', 'sidewalk', 'building', 'wall', 'fence', 'pole', 'trafficlight', 'trafficsign', 'vegetation', 'terrain', 'sky', 'person', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle', 'ignore']
+        labels = cityscapes_labels
+    elif dataset_name == 'Mapillary':
+        cla_names = ['Bird', 'Ground Animal', 'Curb', 'Fence', 'Guard Rail', 'Barrier', 'Wall', 'Bike Lane', 'Crosswalk-Plain', 'Curb Cut', 'Parking', 'Pedestrian Area', 'Rail Track', 'Road', 'Service Lane', 'Sidewalk', 'Bridge', 'Building', 'Tunnel', 'Person', 'Bicyclist', 'Motorcyclist', 'Other Rider', 'LaneMarking-Crosswalk', 'LaneMarking-General', 'Mountain', 'Sand', 'Sky', 'Snow', 'Terrain', 'Vegetation', 'Water', 'Banner', 'Bench', 'Bike Rack', 'Billboard', 'Catch Basin', 'CCTV Camera', 'Fire Hydrant', 'Junction Box', 'Mailbox', 'Manhole', 'Phone Booth', 'Pothole', 'Street Light', 'Pole', 'Traffic Sign Frame', 'Utility Pole', 'Traffic Light', 'Traffic Sign (Back)', 'Traffic Sign (Front)', 'Trash Can', 'Bicycle', 'Boat', 'Bus', 'Car', 'Caravan', 'Motorcycle', 'On Rails', 'Other Vehicle', 'Trailer', 'Truck', 'Wheeled Slow', 'Car Mount', 'Ego Vehicle', 'ignore']
+        labels = mapillary_labels
 
     eval_loss = 0.0
     testdatalen = len(dataloader)
     with torch.no_grad():
-        evalLabels, confMatrix = generateMatrix()
+        evalLabels, confMatrix, category2labels = generateMatrix(labels)
         nbPixels = 0
         for imgs, masks, names in tqdm(dataloader):
             _masks = F.softmax(model(imgs.to(dev)), dim=1)
@@ -230,7 +282,7 @@ def SS_Evaluate(model, dataloader, dev):
         for label in evalLabels:
             classScoreList = {}
             labelName = cla_names[label]
-            iou, pre, recall, f1 = getMetricsForLabel(label, confMatrix, evalLabels)
+            iou, pre, recall, f1 = getMetricsForLabel(label, confMatrix, evalLabels, labels)
 
             classScoreList['IoU'] = iou
             classScoreList['Precision'] = pre
@@ -247,7 +299,7 @@ def SS_Evaluate(model, dataloader, dev):
         catScoreList = {}
         for category in category2labels.keys():
             categoryScoreList = {}
-            iou, pre, recall, f1 = getMetricsForCategory(category, confMatrix, evalLabels)
+            iou, pre, recall, f1 = getMetricsForCategory(category, confMatrix, evalLabels, labels, category2labels)
 
             categoryScoreList['IoU'] = iou
             categoryScoreList['Precision'] = pre

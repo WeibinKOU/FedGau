@@ -27,7 +27,7 @@ class Dataset(Dataset):
         self.mask_dir = self.data_dir + 'masks/'
         self.num_classes = num_classes
 
-        self.transform = iaa.Sequential([
+        self.train_transform = iaa.Sequential([
             iaa.Fliplr(.5),
             iaa.Affine(
                 translate_percent={'x': (-.05, .05), 'y': (-.05, .05)},
@@ -37,6 +37,10 @@ class Dataset(Dataset):
             #iaa.GammaContrast((.4, 2.5)),
             #iaa.GaussianBlur((0, 3.0)),
 
+            iaa.Resize({'height': HEIGHT, 'width': WIDTH}),
+        ])
+
+        self.test_transform = iaa.Sequential([
             iaa.Resize({'height': HEIGHT, 'width': WIDTH}),
         ])
 
@@ -78,26 +82,20 @@ class Dataset(Dataset):
         img = cv2.imread(os.path.join(self.img_dir, name), cv2.IMREAD_COLOR)[..., ::-1]
         mask = cv2.imread(os.path.join(self.mask_dir, mask_name), cv2.IMREAD_GRAYSCALE)
 
+        mask = np.expand_dims(mask, axis=2)
+        comb = np.concatenate((img, mask), axis=2)
         if self.type_ == 'train':
-            mask = np.expand_dims(mask, axis=2)
-            comb = np.concatenate((img, mask), axis=2)
-            new_comb = self.transform(image=comb)
-            img = new_comb[:,:,:3]
-            mask = new_comb[:,:,3:]
+            new_comb = self.train_transform(image=comb)
+        else:
+            new_comb = self.test_transform(image=comb)
+        img = new_comb[:,:,:3]
+        mask = new_comb[:,:,3:]
 
         img_tensor = self.img_to_tensor(img)
-        #mask_layers = self.mask_to_layers(mask)
-        #mask_tensor = torch.cat(mask_layers, dim=0).squeeze()
-        if self.type_ == 'train':
-            mask = mask.squeeze()
-            mask[mask >= 18] = 19
-            mask_tensor = torch.from_numpy(mask).long()
-        else:
-            #mask_layers = self.mask_to_layers(mask)
-            #mask_tensor = torch.cat(mask_layers, dim=0).squeeze()
-            mask = mask.squeeze()
-            mask[mask >= 18] = 19
-            mask_tensor = torch.from_numpy(mask).long()
+
+        mask = mask.squeeze()
+        mask[mask >= self.num_classes - 1] = self.num_classes - 1
+        mask_tensor = torch.from_numpy(mask).long()
 
         return img_tensor, mask_tensor, name
 
