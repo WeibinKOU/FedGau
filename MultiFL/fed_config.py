@@ -24,7 +24,7 @@ semSeg = {
             'Agent0' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client4/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/centralized/',
+                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client4/',
                 'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
@@ -38,6 +38,7 @@ semSeg = {
             'Agent1' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client6/',
+                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client6/',
                 'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
@@ -51,6 +52,7 @@ semSeg = {
             'Agent2' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client7/',
+                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client7/',
                 'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
@@ -71,6 +73,7 @@ semSeg = {
             'Agent0' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client1/',
+                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client1/',
                 'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
@@ -84,6 +87,7 @@ semSeg = {
             'Agent1' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client2/',
+                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client2/',
                 'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
@@ -104,6 +108,7 @@ semSeg = {
             'Agent0' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client3/',
+                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client3/',
                 'lr': 0.0001,
                 'batch_size': 8,
                'betas': (0.9, 0.999),
@@ -117,6 +122,7 @@ semSeg = {
             'Agent1' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client5/',
+                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client5/',
                 'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
@@ -131,6 +137,7 @@ semSeg = {
         'test':
         {
             'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/test/',
+            #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/test/',
             'batch_size': 8,
         },
 
