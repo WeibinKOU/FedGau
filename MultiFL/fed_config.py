@@ -17,9 +17,10 @@ task = 'semSeg' #alternatives: semSeg, objDect, classification
 semSeg = {
         'Edge0' : #Northern Germany
         {
-            #'agg_coef': 0.363, #cityscapes ratio
-            'agg_coef': 0.41, #cityscapes bd
-            #'agg_coef': 1.0, #cityscapes centralized
+            #'agg_coef': 0.363, #cityscapes fedavg
+            'agg_coef': 0.41, #cityscapes fedstats
+            #'agg_coef': 0.41, #Mapillary fedavg
+            #'agg_coef': 0.45, #Mapillary fedstats
             'Agent0' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client4/',
@@ -28,9 +29,10 @@ semSeg = {
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                #'agg_coef': 0.535, #cityscapes ratio
-                'agg_coef': 0.41, #cityscapes bd
-                #'agg_coef': 1.0, #cityscapes centralized
+                #'agg_coef': 0.535, #cityscapes fedavg
+                'agg_coef': 0.41, #cityscapes fedstats
+                #'agg_coef': 0.58, #Mapillary fedavg
+                #'agg_coef': 0.79, #Mapillary fedstats
             },
 
             'Agent1' :
@@ -40,8 +42,10 @@ semSeg = {
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                #'agg_coef': 0.265, #cityscapes ratio
-                'agg_coef': 0.44, #cityscapes bd
+                #'agg_coef': 0.265, #cityscapes fedavg
+                'agg_coef': 0.44, #cityscapes fedstats
+                #'agg_coef': 0.11, #Mapillary fedavg
+                #'agg_coef': 0.05, #Mapillary fedstats
             },
 
             'Agent2' :
@@ -51,15 +55,19 @@ semSeg = {
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                #'agg_coef': 0.201, #cityscapes ratio
-                'agg_coef': 0.15, #cityscapes bd
+                #'agg_coef': 0.201, #cityscapes fedavg
+                'agg_coef': 0.15, #cityscapes fedstats
+                #'agg_coef': 0.31, #Mapillary fedavg
+                #'agg_coef': 0.16, #Mapillary festats
             },
         },
 
         'Edge1': # Rhine-Ruhr Region
         {
-            #'agg_coef': 0.352, #cityscapes ratio
-            'agg_coef': 0.11, #cityscapes bd
+            #'agg_coef': 0.352, #cityscapes fedavg
+            'agg_coef': 0.11, #cityscapes festats
+            #'agg_coef': 0.24, #Mapillary fedavg
+            #'agg_coef': 0.20, #Mapillary fedstats
             'Agent0' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client1/',
@@ -67,8 +75,10 @@ semSeg = {
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                #'agg_coef': 0.560, #cityscapes ratio
-                'agg_coef': 0.61, #cityscapes bd
+                #'agg_coef': 0.560, #cityscapes fedavg
+                'agg_coef': 0.61, #cityscapes fedstats
+                #'agg_coef': 0.77, #Mapillary fesavg
+                #'agg_coef': 0.94, #Mapillary fedstats
             },
 
             'Agent1' :
@@ -78,15 +88,19 @@ semSeg = {
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                #'agg_coef': 0.440, #cityscapes ratio
-                'agg_coef': 0.39, #cityscapes bd
+                #'agg_coef': 0.440, #cityscapes fedavg
+                'agg_coef': 0.39, #cityscapes fedstats
+                #'agg_coef': 0.23, #Mapillary fedavg
+                #'agg_coef': 0.06, #Mapillary fedstats
             },
         },
 
         'Edge2': #Western Germany - Cental
         {
-            #'agg_coef': 0.285, #cityscapes ratio
-            'agg_coef': 0.48, #cityscapes bd
+            #'agg_coef': 0.285, #cityscapes fedavg
+            'agg_coef': 0.48, #cityscapes fedstats
+            #'agg_coef': 0.35, #Mapillary fedavg
+            #'agg_coef': 0.35, #Mapillary fedstats
             'Agent0' :
             {
                 'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client3/',
@@ -94,8 +108,10 @@ semSeg = {
                 'batch_size': 8,
                'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                #'agg_coef': 0.652, #cityscapes ratio
-                'agg_coef': 0.90, #cityscapes bd
+                #'agg_coef': 0.652, #cityscapes fedavg
+                'agg_coef': 0.90, #cityscapes fedstats
+                #'agg_coef': 0.29, #Mapillary fedavg
+                #'agg_coef': 0.12, #Mapillary fedstats
             },
 
             'Agent1' :
@@ -105,8 +121,10 @@ semSeg = {
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                #'agg_coef': 0.348, #cityscapes ratio
-                'agg_coef': 0.10, #cityscapes bd
+                #'agg_coef': 0.348, #cityscapes fedavg
+                'agg_coef': 0.10, #cityscapes fedstats
+                #'agg_coef': 0.71, #Mapillary fedavg
+                #'agg_coef': 0.88, #Mapillary fedstats
             }
         },
 
