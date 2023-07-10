@@ -16,6 +16,9 @@ from utils.func import *
 WIDTH=960 #Mapillary
 HEIGHT=720 #Mapillary
 
+#WIDTH=960 #CamVid
+#HEIGHT=720 #CamVid
+
 task = 'semSeg' #alternatives: semSeg, objDect, classification
 semSeg = {
         'Edge0' : #Northern Germany
@@ -24,6 +27,8 @@ semSeg = {
             #'agg_coef': 0.41, #cityscapes fedstats
             'agg_coef': 0.41, #Mapillary fedavg
             #'agg_coef': 0.45, #Mapillary fedstats
+            #'agg_coef': 0.47, #CamVid fedavg
+            #'agg_coef': 0.59, #CamVid fedstats
             'Agent0' :
             {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client4/',
@@ -36,6 +41,8 @@ semSeg = {
                 #'agg_coef': 0.41, #cityscapes fedstats
                 'agg_coef': 0.58, #Mapillary fedavg
                 #'agg_coef': 0.79, #Mapillary fedstats
+                #'agg_coef': 0.37, #CamVid fedavg
+                #'agg_coef': 0.28, #CamVid fedstats
             },
 
             'Agent1' :
@@ -50,6 +57,8 @@ semSeg = {
                 #'agg_coef': 0.44, #cityscapes fedstats
                 'agg_coef': 0.11, #Mapillary fedavg
                 #'agg_coef': 0.05, #Mapillary fedstats
+                #'agg_coef': 0.11, #CamVid fedavg
+                #'agg_coef': 0.07, #CamVid fedstats
             },
 
             'Agent2' :
@@ -64,6 +73,8 @@ semSeg = {
                 #'agg_coef': 0.15, #cityscapes fedstats
                 'agg_coef': 0.31, #Mapillary fedavg
                 #'agg_coef': 0.16, #Mapillary festats
+                #'agg_coef': 0.51, #CamVid fedavg
+                #'agg_coef': 0.66, #CamVid fedstats
             },
         },
 
@@ -73,6 +84,8 @@ semSeg = {
             #'agg_coef': 0.11, #cityscapes festats
             'agg_coef': 0.24, #Mapillary fedavg
             #'agg_coef': 0.20, #Mapillary fedstats
+            #'agg_coef': 0.25, #CamVid fedavg
+            #'agg_coef': 0.19, #CamVid fedstats
             'Agent0' :
             {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client1/',
@@ -85,6 +98,8 @@ semSeg = {
                 #'agg_coef': 0.61, #cityscapes fedstats
                 'agg_coef': 0.77, #Mapillary fesavg
                 #'agg_coef': 0.94, #Mapillary fedstats
+                #'agg_coef': 0.79, #CamVid fedavg
+                #'agg_coef': 0.97, #CamVid fedstats
             },
 
             'Agent1' :
@@ -99,6 +114,8 @@ semSeg = {
                 #'agg_coef': 0.39, #cityscapes fedstats
                 'agg_coef': 0.23, #Mapillary fedavg
                 #'agg_coef': 0.06, #Mapillary fedstats
+                #'agg_coef': 0.21, #CamVid fedavg
+                #'agg_coef': 0.03, #CamVid fedstats
             },
         },
 
@@ -108,6 +125,8 @@ semSeg = {
             #'agg_coef': 0.48, #cityscapes fedstats
             'agg_coef': 0.35, #Mapillary fedavg
             #'agg_coef': 0.35, #Mapillary fedstats
+            #'agg_coef': 0.28, #CamVid fedavg
+            #'agg_coef': 0.22, #CamVid fedstats
             'Agent0' :
             {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client3/',
@@ -120,6 +139,8 @@ semSeg = {
                 #'agg_coef': 0.90, #cityscapes fedstats
                 'agg_coef': 0.29, #Mapillary fedavg
                 #'agg_coef': 0.12, #Mapillary fedstats
+                #'agg_coef': 0.33, #CamVid fedavg
+                #'agg_coef': 0.17, #CamVid fedstats
             },
 
             'Agent1' :
@@ -134,6 +155,8 @@ semSeg = {
                 #'agg_coef': 0.10, #cityscapes fedstats
                 'agg_coef': 0.71, #Mapillary fedavg
                 #'agg_coef': 0.88, #Mapillary fedstats
+                #'agg_coef': 0.67, #CamVid fedavg
+                #'agg_coef': 0.83, #CamVid fedstats
             }
         },
 
