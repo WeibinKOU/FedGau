@@ -40,8 +40,13 @@ class SemSegClient():
         elif self.config['dataset'] == 'Mapillary':
             self.dataset = Dataset(self.config[self.eid][self.cid]['dataset'], num_classes=66)
             self.test_dataset = Dataset(self.config['test']['dataset'], num_classes=66, type_='test')
-            self.criterion = nn.CrossEntropyLoss(ignore_index=66).to(self.dev)
+            self.criterion = nn.CrossEntropyLoss(ignore_index=65).to(self.dev)
             self.model = self.config['model'](n_classes=66).to(self.dev)
+        elif self.config['dataset'] == 'CamVid':
+            self.dataset = Dataset(self.config[self.eid][self.cid]['dataset'], num_classes=12)
+            self.test_dataset = Dataset(self.config['test']['dataset'], num_classes=12, type_='test')
+            self.criterion = nn.CrossEntropyLoss(ignore_index=11).to(self.dev)
+            self.model = self.config['model'](n_classes=12).to(self.dev)
         else:
             print('Dataset %s is not supported!'%self.config['dataset'])
             exit()
@@ -55,16 +60,16 @@ class SemSegClient():
 
         if 'FedAlgo' not in self.config:
             self.mu = 0.0
-            self.beta = 0.0
+            self.alpha = 0.0
         elif self.config['FedAlgo'] == 'FedAvg' or self.config['FedAlgo'] == 'FedStats':
             self.mu = 0.0
-            self.beta = 0.0
+            self.alpha = 0.0
         elif self.config['FedAlgo'] == 'FedProx':
             self.mu = 0.01
-            self.beta = 0.0
+            self.alpha = 0.0
         elif self.config['FedAlgo'] == 'FedDyn':
             self.mu = 0.01
-            self.beta = 1.0
+            self.alpha = 1.0
 
         self.prev_grads = None
         for param in self.model.parameters():
@@ -162,7 +167,7 @@ class SemSegClient():
                         curr_params = torch.cat((curr_params, param.view(-1)), dim=0)
 
                 lin_penalty = torch.sum(curr_params * self.prev_grads)
-                dist -= self.beta * lin_penalty
+                dist -= self.alpha * lin_penalty
 
                 dist.backward()
                 loss.update(dist.item())

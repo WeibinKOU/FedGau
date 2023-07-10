@@ -155,6 +155,23 @@ mapillary_labels = [
     Label(  'ignore'               , 65 ,       65 , 'void'            , 6       , False        , True          , (0, 0, 0))
     ]
 
+
+CamVid_labels = [
+    #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
+    Label(  'sky'                  ,  0 ,        0 , 'sky'             ,    0     , False        , False        , (128, 64,128) ),
+    Label(  'building'             ,  1 ,        1 , 'building'        ,    1     , False        , False        , (244, 35,232) ),
+    Label(  'pole'                 ,  2 ,        2 , 'pole'            ,    2     , False        , False        , ( 70, 70, 70) ),
+    Label(  'road'                 ,  3 ,        3 , 'road'            ,    3     , False        , False        , (102,102,156) ),
+    Label(  'sidewalk'             ,  4 ,        4 , 'sidewalk'        ,    4     , False        , False        , (190,153,153) ),
+    Label(  'tree'                 ,  5 ,        5 , 'tree'            ,    5     , False        , False        , (153,153,153) ),
+    Label(  'signsymbol'           ,  6 ,        6 , 'signsymbol'      ,    6     , False        , False        , (250,170, 30) ),
+    Label(  'fence'                ,  7 ,        7 , 'fence'           ,    7     , False        , False        , (220,220,  0) ),
+    Label(  'car'                  ,  8 ,        8 , 'car'             ,    8     , False        , False        , (107,142, 35) ),
+    Label(  'pedestrian'           ,  9 ,        9 , 'pedestrian'      ,    9     , False        , False        , (152,251,152) ),
+    Label(  'bicyclist'            , 10 ,       10 , 'bicyclist'       ,   10     , False        , False        , ( 70,130,180) ),
+    Label(  'ignore'               , 11 ,       11 , 'void'            ,   11     , False        , True         , (  0,  0,142) ),
+]
+
 def generateMatrix(labels):
     category2labels = {}
     evalLabels = []
@@ -259,6 +276,9 @@ def SS_Evaluate(model, dataloader, dev, dataset_name):
     elif dataset_name == 'Mapillary':
         cla_names = ['Bird', 'Ground Animal', 'Curb', 'Fence', 'Guard Rail', 'Barrier', 'Wall', 'Bike Lane', 'Crosswalk-Plain', 'Curb Cut', 'Parking', 'Pedestrian Area', 'Rail Track', 'Road', 'Service Lane', 'Sidewalk', 'Bridge', 'Building', 'Tunnel', 'Person', 'Bicyclist', 'Motorcyclist', 'Other Rider', 'LaneMarking-Crosswalk', 'LaneMarking-General', 'Mountain', 'Sand', 'Sky', 'Snow', 'Terrain', 'Vegetation', 'Water', 'Banner', 'Bench', 'Bike Rack', 'Billboard', 'Catch Basin', 'CCTV Camera', 'Fire Hydrant', 'Junction Box', 'Mailbox', 'Manhole', 'Phone Booth', 'Pothole', 'Street Light', 'Pole', 'Traffic Sign Frame', 'Utility Pole', 'Traffic Light', 'Traffic Sign (Back)', 'Traffic Sign (Front)', 'Trash Can', 'Bicycle', 'Boat', 'Bus', 'Car', 'Caravan', 'Motorcycle', 'On Rails', 'Other Vehicle', 'Trailer', 'Truck', 'Wheeled Slow', 'Car Mount', 'Ego Vehicle', 'ignore']
         labels = mapillary_labels
+    elif dataset_name == 'CamVid':
+        cla_names = ['sky', 'building', 'pole', 'road', 'sidewalk', 'tree', 'signsymbol', 'fence', 'car', 'pedestrian', 'bicyclist', 'ignore']
+        labels = CamVid_labels
 
     eval_loss = 0.0
     testdatalen = len(dataloader)

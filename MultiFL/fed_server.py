@@ -50,6 +50,8 @@ class EdgeServer():
                 self.model = self.config['model'](n_classes=20).to(self.dev)
             elif self.config['dataset'] == 'Mapillary':
                 self.model = self.config['model'](n_classes=66).to(self.dev)
+            elif self.config['dataset'] == 'CamVid':
+                self.model = self.config['model'](n_classes=12).to(self.dev)
             self.agent = SemSegClient
         elif self.task == 'objDect':
             _, num_classes = get_classes(self.config['classes_path'])
@@ -93,6 +95,8 @@ class EdgeServer():
                 test_dataset = Dataset(self.config['test']['dataset'], num_classes=20, type_='test')
             elif self.config['dataset'] == 'Mapillary':
                 test_dataset = Dataset(self.config['test']['dataset'], num_classes=66, type_='test')
+            elif self.config['dataset'] == 'CamVid':
+                test_dataset = Dataset(self.config['test']['dataset'], num_classes=12, type_='test')
             test_dataloader = DataLoader(test_dataset,
                                          batch_size=self.config['test']['batch_size'],
                                          shuffle=True,
@@ -213,6 +217,8 @@ class CloudServer():
                 self.model = self.config['model'](n_classes=20).to(self.dev)
             elif self.config['dataset'] == 'Mapillary':
                 self.model = self.config['model'](n_classes=66).to(self.dev)
+            elif self.config['dataset'] == 'CamVid':
+                self.model = self.config['model'](n_classes=12).to(self.dev)
             else:
                 print('Dataset %s is not supported!'%self.config['dataset'])
                 exit()
@@ -298,6 +304,9 @@ class CloudServer():
                 test_dataset = Dataset(self.config['test']['dataset'], num_classes=20, type_='test')
             elif self.config['dataset'] == 'Mapillary':
                 test_dataset = Dataset(self.config['test']['dataset'], num_classes=66, type_='test')
+            elif self.config['dataset'] == 'CamVid':
+                test_dataset = Dataset(self.config['test']['dataset'], num_classes=12, type_='test')
+
             test_dataloader = DataLoader(test_dataset,
                                          batch_size=self.config['test']['batch_size'],
                                          shuffle=True,
