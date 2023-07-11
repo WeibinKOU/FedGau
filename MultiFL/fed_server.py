@@ -100,7 +100,8 @@ class EdgeServer():
             test_dataloader = DataLoader(test_dataset,
                                          batch_size=self.config['test']['batch_size'],
                                          shuffle=True,
-                                         num_workers=1)
+                                         num_workers=1,
+                                         drop_last=True)
 
             clsdicts, catdicts, self.eval_loss = SS_Evaluate(self.model, test_dataloader, self.dev, self.config['dataset'])
             self.tb.add_scalar('%s.Eval.Loss' % self.id, self.eval_loss, self.fed_cnt)
@@ -310,7 +311,8 @@ class CloudServer():
             test_dataloader = DataLoader(test_dataset,
                                          batch_size=self.config['test']['batch_size'],
                                          shuffle=True,
-                                         num_workers=1)
+                                         num_workers=1,
+                                         drop_last=True)
 
             clsdicts, catdicts, eval_loss = SS_Evaluate(self.model, test_dataloader, self.dev, self.config['dataset'])
             self.tb.add_scalar('Cloud.Eval.Loss', eval_loss, self.fed_cnt)
