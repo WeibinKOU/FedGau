@@ -64,11 +64,11 @@ class SemSegClient():
         elif self.config['FedAlgo'] == 'FedAvg' or self.config['FedAlgo'] == 'FedStats':
             self.mu = 0.0
             self.alpha = 0.0
-        elif self.config['FedAlgo'] == 'FedProx':
-            self.mu = 0.01
+        elif 'FedProx' in self.config['FedAlgo']:
+            self.mu = float(self.config['FedAlgo'].split('-')[-1])
             self.alpha = 0.0
-        elif self.config['FedAlgo'] == 'FedDyn':
-            self.mu = 0.01
+        elif 'FedDyn' in self.config['FedAlgo']:
+            self.mu = float(self.config['FedAlgo'].split('-')[-1])
             self.alpha = 1.0
 
         self.prev_grads = None
