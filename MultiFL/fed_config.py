@@ -22,81 +22,59 @@ semSeg = {
         {
             #'agg_coef': 0.363, #cityscapes fedavg
             #'agg_coef': 0.41, #cityscapes fedstats
-            #'agg_coef': 0.41, #Mapillary fedavg
+            'agg_coef': 0.41, #Mapillary fedavg
             #'agg_coef': 0.45, #Mapillary fedstats
-            #'agg_coef': 0.47, #CamVid fedavg
-            #'agg_coef': 0.59, #CamVid fedstats
             #'agg_coef': 0.51, #NIID CamVid fedavg
             #'agg_coef': 0.84, #NIID CamVid fedstats
-            'agg_coef': 0.50, #NIID fedavg
-            #'agg_coef': 0.44, #NIID fedstats
             'Agent0' :
             {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client4/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client4/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/CamVid/client4/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client4/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client4/',
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/niid/client4/',
                 'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 #'agg_coef': 0.535, #cityscapes fedavg
                 #'agg_coef': 0.41, #cityscapes fedstats
-                #'agg_coef': 0.58, #Mapillary fedavg
+                'agg_coef': 0.58, #Mapillary fedavg
                 #'agg_coef': 0.79, #Mapillary fedstats
-                #'agg_coef': 0.37, #CamVid fedavg
-                #'agg_coef': 0.28, #CamVid fedstats
                 #'agg_coef': 0.16, #NIID CamVid fedavg
                 #'agg_coef': 0.05, #NIID CamVid fedstats
-                'agg_coef': 0.57, #NIID fedavg
-                #'agg_coef': 0.30, #NIID fedstats
             },
 
             'Agent1' :
             {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client6/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client6/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/CamVid/client6/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client6/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client6/',
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/niid/client6/',
                 'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 #'agg_coef': 0.265, #cityscapes fedavg
                 #'agg_coef': 0.44, #cityscapes fedstats
-                #'agg_coef': 0.11, #Mapillary fedavg
+                'agg_coef': 0.11, #Mapillary fedavg
                 #'agg_coef': 0.05, #Mapillary fedstats
-                #'agg_coef': 0.11, #CamVid fedavg
-                #'agg_coef': 0.07, #CamVid fedstats
                 #'agg_coef': 0.37, #NIID CamVid fedavg
                 #'agg_coef': 0.43, #NIID CamVid fedstats
-                'agg_coef': 0.35, #NIID fedavg
-                #'agg_coef': 0.34, #NIID fedstats
             },
 
             'Agent2' :
             {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client7/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client7/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/CamVid/client7/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client7/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client7/',
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/niid/client7/',
                 'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 #'agg_coef': 0.201, #cityscapes fedavg
                 #'agg_coef': 0.15, #cityscapes fedstats
-                #'agg_coef': 0.31, #Mapillary fedavg
+                'agg_coef': 0.31, #Mapillary fedavg
                 #'agg_coef': 0.16, #Mapillary festats
-                #'agg_coef': 0.51, #CamVid fedavg
-                #'agg_coef': 0.66, #CamVid fedstats
                 #'agg_coef': 0.48, #NIID CamVid fedavg
                 #'agg_coef': 0.53, #NIID CamVid fedstats
-                'agg_coef': 0.09, #NIID fedavg
-                #'agg_coef': 0.36, #NIID fedstats
             },
         },
 
@@ -104,58 +82,42 @@ semSeg = {
         {
             #'agg_coef': 0.352, #cityscapes fedavg
             #'agg_coef': 0.11, #cityscapes festats
-            #'agg_coef': 0.24, #Mapillary fedavg
+            'agg_coef': 0.24, #Mapillary fedavg
             #'agg_coef': 0.20, #Mapillary fedstats
-            #'agg_coef': 0.25, #CamVid fedavg
-            #'agg_coef': 0.19, #CamVid fedstats
             #'agg_coef': 0.28, #NIID CamVid fedavg
             #'agg_coef': 0.13, #NIID CamVid fedstats
-            'agg_coef': 0.37, #NIID fedavg
-            #'agg_coef': 0.49, #NIID fedstats
             'Agent0' :
             {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client1/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client1/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/CamVid/client1/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client1/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client1/',
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/niid/client1/',
                 'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 #'agg_coef': 0.560, #cityscapes fedavg
                 #'agg_coef': 0.61, #cityscapes fedstats
-                #'agg_coef': 0.77, #Mapillary fesavg
+                'agg_coef': 0.77, #Mapillary fesavg
                 #'agg_coef': 0.94, #Mapillary fedstats
-                #'agg_coef': 0.79, #CamVid fedavg
-                #'agg_coef': 0.97, #CamVid fedstats
                 #'agg_coef': 0.43, #NIID CamVid fedavg
                 #'agg_coef': 0.34, #NIID CamVid fedstats
-                'agg_coef': 0.24, #NIID fedavg
-                #'agg_coef': 0.17, #NIID fedstats
             },
 
             'Agent1' :
             {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client2/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client2/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/CamVid/client2/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client2/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client2/',
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/niid/client2/',
                 'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 #'agg_coef': 0.440, #cityscapes fedavg
                 #'agg_coef': 0.39, #cityscapes fedstats
-                #'agg_coef': 0.23, #Mapillary fedavg
+                'agg_coef': 0.23, #Mapillary fedavg
                 #'agg_coef': 0.06, #Mapillary fedstats
-                #'agg_coef': 0.21, #CamVid fedavg
-                #'agg_coef': 0.03, #CamVid fedstats
                 #'agg_coef': 0.57, #NIID CamVid fedavg
                 #'agg_coef': 0.66, #NIID CamVid fedstats
-                'agg_coef': 0.76, #NIID fedavg
-                #'agg_coef': 0.83, #NIID fedstats
             },
         },
 
@@ -163,79 +125,61 @@ semSeg = {
         {
             #'agg_coef': 0.285, #cityscapes fedavg
             #'agg_coef': 0.48, #cityscapes fedstats
-            #'agg_coef': 0.35, #Mapillary fedavg
+            'agg_coef': 0.35, #Mapillary fedavg
             #'agg_coef': 0.35, #Mapillary fedstats
-            #'agg_coef': 0.28, #CamVid fedavg
-            #'agg_coef': 0.22, #CamVid fedstats
             #'agg_coef': 0.21, #NIID CamVid fedavg
             #'agg_coef': 0.03, #NIID CamVid fedstats
-            'agg_coef': 0.13, #NIID fedavg
-            #'agg_coef': 0.06, #NIID fedstats
             'Agent0' :
             {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client3/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client3/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/CamVid/client3/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client3/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client3/',
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/niid/client3/',
                 'lr': 0.0001,
                 'batch_size': 8,
                'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 #'agg_coef': 0.652, #cityscapes fedavg
                 #'agg_coef': 0.90, #cityscapes fedstats
-                #'agg_coef': 0.29, #Mapillary fedavg
+                'agg_coef': 0.29, #Mapillary fedavg
                 #'agg_coef': 0.12, #Mapillary fedstats
-                #'agg_coef': 0.33, #CamVid fedavg
-                #'agg_coef': 0.17, #CamVid fedstats
                 #'agg_coef': 0.38, #NIID CamVid fedavg
                 #'agg_coef': 0.31, #NIID CamVid fedstats
-                'agg_coef': 0.67, #NIID CamVid fedavg
-                #'agg_coef': 0.81, #NIID CamVid fedstats
             },
 
             'Agent1' :
             {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client5/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client5/',
-                #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/CamVid/client5/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client5/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client5/',
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/niid/client5/',
                 'lr': 0.0001,
                 'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 #'agg_coef': 0.348, #cityscapes fedavg
                 #'agg_coef': 0.10, #cityscapes fedstats
-                #'agg_coef': 0.71, #Mapillary fedavg
+                'agg_coef': 0.71, #Mapillary fedavg
                 #'agg_coef': 0.88, #Mapillary fedstats
-                #'agg_coef': 0.67, #CamVid fedavg
-                #'agg_coef': 0.83, #CamVid fedstats
                 #'agg_coef': 0.62, #NIID CamVid fedavg
                 #'agg_coef': 0.69, #NIID CamVid fedstats
-                'agg_coef': 0.33, #NIID CamVid fedavg
-                #'agg_coef': 0.19, #NIID CamVid fedstats
             }
         },
 
         'test':
         {
             #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/test/',
-            #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/test/',
-            #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/CamVid/test/',
+            'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/test/',
             #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/test/',
-            'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/niid/test/',
             'batch_size': 8,
         },
 
         'model': DeepLabv3,
-        'dataset': 'CamVid',  #Alternatives: Mapillary, cityscapes, CamVid
+        'dataset': 'Mapillary',  #Alternatives: Mapillary, cityscapes, CamVid
         'global_round': 50,
         'EAI': 3,
         'CAI': 2,
         'GPU_ID': 0,
         'enable_optim': False,
-        'FedAlgo': 'FedAvg', #Alternatives: FedAvg, FedProx, FedDyn and FedStats
+        'FedAlgo': 'FedAvg', #Alternatives: FedAvg, FedProx-0.01, FedDyn-0.01, FedProx-0.005, FedDyn-0.005 and FedStats
         'logdir': '/home/wbkou/AAAI/HFL-DynaCoeffi/logs'
 }
 
