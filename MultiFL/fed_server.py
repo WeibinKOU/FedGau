@@ -252,6 +252,11 @@ class CloudServer():
         for i in range(self.edges_num):
             eid = 'Edge'+str(i)
             self.edges.append(EdgeServer(eid, self.config, self.edges_dict, self.tb, self.dev, self.task, '/' + self.task + '/' + self.time_str + '/'))
+        self.clients_num = sum([len(edge.clients) for edge in self.edges])
+        self.cq = []
+        self.curr_cq = 0.0
+        self.last_perf = 0.0
+        self.curr_perf = 0.0
 
     def run(self):
         save_path = self.logdir + '/' + self.task + '/' + self.time_str + '/' + 'checkpoints/'
@@ -333,6 +338,7 @@ class CloudServer():
 
             for k, v in catdicts.items():
                 if k == 'mIoU':
+                    self.curr_perf = 100*v
                     self.tb.add_scalar('Cloud.Eval.Category.mIoU', 100*v, self.fed_cnt)
                 elif k == 'mPrecision':
                     self.tb.add_scalar('Cloud.Eval.Category.mPrecision', 100*v, self.fed_cnt)
@@ -353,6 +359,8 @@ class CloudServer():
 
             traffic = 2 * (self.config['CAI'] * sum([len(edge.clients) for edge in self.edges]) + len(self.edges))
             self.tb.add_scalar('Cloud.Traffic', traffic, self.fed_cnt)
+            self.curr_cq = (self.curr_perf - self.last_perf) / traffic if self.curr_perf - self.last_perf > 0 else 0
+            self.cq.append(self.curr_cq)
 
             self.hetero_eg = eval_loss - sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].eval_loss for i in range(len(self.edges)))
             self.hetero_eg = self.hetero_eg.item()
@@ -363,7 +371,8 @@ class CloudServer():
             self.beta = sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].beta for i in range(len(self.edges)))
             self.grad = sum([self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].grad for i in range(len(self.edges))], torch.zeros_like(self.edges[0].grad))
             self.grad = self.grad.norm(2).item()
-            optim_theta = min([1, abs(self.hetero_ce / self.hetero_eg)])
+            optim_theta = self.curr_cq / (max(self.cq) + 1e-6)
+
 
             self.tb.add_scalar('Cloud.Optim.Hetero_EG', self.hetero_eg, self.fed_cnt)
             self.tb.add_scalar('Cloud.Optim.Hetero_CE', self.hetero_ce, self.fed_cnt)
@@ -398,6 +407,7 @@ class CloudServer():
             self.tb.add_scalar('Cloud.Optim.EAI', self.config['EAI'], self.fed_cnt)
             self.tb.add_scalar('Cloud.Optim.CAI', self.config['CAI'], self.fed_cnt)
 
+            self.last_perf = self.curr_perf
         elif self.task == 'objDect':
             num_val = 0
             val_lines = None
