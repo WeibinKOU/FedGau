@@ -257,6 +257,7 @@ class CloudServer():
         self.curr_cq = 0.0
         self.last_perf = 0.0
         self.curr_perf = 0.0
+        self.traffic = 0
 
     def run(self):
         save_path = self.logdir + '/' + self.task + '/' + self.time_str + '/' + 'checkpoints/'
@@ -358,7 +359,8 @@ class CloudServer():
             print(log_cat_info)
 
             traffic = 2 * (self.config['CAI'] * sum([len(edge.clients) for edge in self.edges]) + len(self.edges))
-            self.tb.add_scalar('Cloud.Traffic', traffic, self.fed_cnt)
+            self.traffic += traffic
+            self.tb.add_scalar('Cloud.Traffic', self.traffic, self.fed_cnt)
             self.curr_cq = (self.curr_perf - self.last_perf) / traffic if self.curr_perf - self.last_perf > 0 else 0
             self.cq.append(self.curr_cq)
 
