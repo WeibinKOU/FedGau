@@ -361,8 +361,9 @@ class CloudServer():
             traffic = 2 * (self.config['CAI'] * sum([len(edge.clients) for edge in self.edges]) + len(self.edges))
             self.traffic += traffic
             self.tb.add_scalar('Cloud.Traffic', self.traffic, self.fed_cnt)
-            self.curr_cq = (self.curr_perf - self.last_perf) / traffic if self.curr_perf - self.last_perf > 0 else 0
-            self.cq.append(self.curr_cq)
+            if self.last_perf > 0:
+                self.curr_cq = (self.curr_perf - self.last_perf) / (traffic + 1e-6) if self.curr_perf - self.last_perf > 0 else 0
+                self.cq.append(self.curr_cq)
 
             self.hetero_eg = eval_loss - sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].eval_loss for i in range(len(self.edges)))
             self.hetero_eg = self.hetero_eg.item()
@@ -373,7 +374,7 @@ class CloudServer():
             self.beta = sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].beta for i in range(len(self.edges)))
             self.grad = sum([self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].grad for i in range(len(self.edges))], torch.zeros_like(self.edges[0].grad))
             self.grad = self.grad.norm(2).item()
-            optim_theta = self.curr_cq / (max(self.cq) + 1e-6)
+            optim_theta = self.curr_cq / (max(self.cq) + 1e-6) if self.last_perf > 0 else 1.0
 
 
             self.tb.add_scalar('Cloud.Optim.Hetero_EG', self.hetero_eg, self.fed_cnt)

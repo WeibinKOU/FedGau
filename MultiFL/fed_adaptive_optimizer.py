@@ -3,6 +3,9 @@ from scipy.optimize import minimize
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 from matplotlib import cm
+from matplotlib import rcParams
+
+rcParams['text.usetex'] = True
 
 class adaptiveOptimizer():
     def __init__(self, edge_num, config):
@@ -56,19 +59,20 @@ class adaptiveOptimizer():
 
         z_values = self.obj([x_grid, y_grid])
 
-        fig = plt.figure()
+        fig = plt.figure(dpi=300)
         ax = fig.add_subplot(111, projection='3d')
 
-        ax.plot_surface(x_grid, y_grid, z_values, cmap='rainbow') #cm.coolwarm
-        ax.contour(x_grid, y_grid, z_values, zdir='z', offset = -50, cmap='rainbow') #cm.coolwarm
-        point_z = self.obj([pointx, pointy])
-        ax.scatter(pointx, pointy, point_z+20, c='red', marker='o', s=50)
-        point_z = self.obj([self.init_eai, self.init_cai])
-        ax.scatter(self.init_eai, self.init_cai, point_z+20, c='orange', marker='x', s=50)
+        ax.plot_surface(x_grid, y_grid, z_values, cmap=cm.coolwarm, alpha=0.8) # 'rainbow' 'hsv'
+        #ax.contour(x_grid, y_grid, z_values, zdir='z', offset = -50, cmap=cm.coolwarm) #cm.coolwarm 'rainbow'
 
-        ax.set_xlabel('tau_1')
-        ax.set_ylabel('tau_2')
-        ax.set_zlabel('Loss')
+        point_z = self.obj([pointx, pointy])
+        ax.scatter(pointx, pointy, point_z, c='red', marker='v', s=200)
+        point_z = self.obj([self.init_eai, self.init_cai])
+        ax.scatter(self.init_eai, self.init_cai, point_z, c='orange', marker='^', s=200)
+
+        ax.set_xlabel(r'$\tau_2$', fontsize=16)
+        ax.set_ylabel(r'$\tau_1$', fontsize=16)
+        ax.set_zlabel(r'$\mathcal{L}(\omega)$')
 
         plt.savefig('/home/wbkou/AAAI/fig_test.jpg')
 
@@ -81,7 +85,7 @@ class adaptiveOptimizer():
 
         result = minimize(self.obj, self.initial_guess, constraints=cons)
         print("Unrounded Result: ", result.x[0], result.x[1])
-        #self.plot_obj(result.x[0], result.x[1])
+        self.plot_obj(result.x[0], result.x[1])
 
         x_opt_int = np.round(result.x)
         return int(x_opt_int[0]), int(x_opt_int[1]), self.C
