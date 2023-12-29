@@ -50,6 +50,7 @@ class adaptiveOptimizer():
 
     def constraint3(self, x):
         return x[0] * x[1] - self.iter_per_rd
+        #return x[1] - self.init_cai
 
     def plot_obj(self, pointx, pointy):
         x_values = np.linspace(1, 10, 200)
@@ -85,7 +86,7 @@ class adaptiveOptimizer():
 
         result = minimize(self.obj, self.initial_guess, constraints=cons)
         print("Unrounded Result: ", result.x[0], result.x[1])
-        self.plot_obj(result.x[0], result.x[1])
+        #self.plot_obj(result.x[0], result.x[1])
 
         x_opt_int = np.round(result.x)
         return int(x_opt_int[0]), int(x_opt_int[1]), self.C

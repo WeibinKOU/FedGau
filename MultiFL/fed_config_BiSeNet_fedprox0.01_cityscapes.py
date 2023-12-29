@@ -172,7 +172,7 @@ semSeg = {
             'batch_size': 4,
         },
 
-        'model': SegNet,
+        'model': BiSeNetV2,
         'dataset': 'cityscapes',  #Alternatives: Mapillary, cityscapes, CamVid
         'global_round': 50,
         'EAI': 2,

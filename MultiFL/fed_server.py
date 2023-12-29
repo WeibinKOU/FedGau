@@ -280,14 +280,14 @@ class CloudServer():
                         edge.SinkModelToClients()
                         if j % 10 == 9:
                             save_name = save_path + "/%s_%d_FL_model.pth" % (edge.id, j)
-                            torch.save(edge.avgModel, save_name)
+                            #torch.save(edge.avgModel, save_name)
                 else:
                     for edge in self.edges:
                         edge.FedAgg()
                         edge.SinkModelToClients()
                         if j % 10 == 9:
                             save_name = save_path + "/%s_%d_FL_model.pth" % (edge.id, j)
-                            torch.save(edge.avgModel, save_name)
+                            #torch.save(edge.avgModel, save_name)
 
     def FedAgg(self):
         for edge in self.edges:

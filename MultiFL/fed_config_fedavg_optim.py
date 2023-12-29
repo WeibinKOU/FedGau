@@ -32,7 +32,7 @@ semSeg = {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client4/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client4/',
                 'lr': 0.0001,
-                'batch_size': 4,
+                'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 'agg_coef': 0.535, #cityscapes fedavg
@@ -49,7 +49,7 @@ semSeg = {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client6/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client6/',
                 'lr': 0.0001,
-                'batch_size': 4,
+                'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 'agg_coef': 0.265, #cityscapes fedavg
@@ -66,7 +66,7 @@ semSeg = {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client7/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client7/',
                 'lr': 0.0001,
-                'batch_size': 4,
+                'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 'agg_coef': 0.201, #cityscapes fedavg
@@ -92,7 +92,7 @@ semSeg = {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client1/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client1/',
                 'lr': 0.0001,
-                'batch_size': 4,
+                'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 'agg_coef': 0.560, #cityscapes fedavg
@@ -109,7 +109,7 @@ semSeg = {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client2/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client2/',
                 'lr': 0.0001,
-                'batch_size': 4,
+                'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 'agg_coef': 0.440, #cityscapes fedavg
@@ -135,7 +135,7 @@ semSeg = {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client3/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client3/',
                 'lr': 0.0001,
-                'batch_size': 4,
+                'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 'agg_coef': 0.652, #cityscapes fedavg
@@ -152,7 +152,7 @@ semSeg = {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client5/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client5/',
                 'lr': 0.0001,
-                'batch_size': 4,
+                'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 'agg_coef': 0.348, #cityscapes fedavg
@@ -169,17 +169,17 @@ semSeg = {
             'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/test/',
             #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/test/',
             #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/test/',
-            'batch_size': 4,
+            'batch_size': 8,
         },
 
-        'model': SegNet,
+        'model': DeepLabv3,
         'dataset': 'cityscapes',  #Alternatives: Mapillary, cityscapes, CamVid
         'global_round': 50,
-        'EAI': 2,
-        'CAI': 3,
+        'EAI': 3,
+        'CAI': 2,
         'GPU_ID': 0,
-        'enable_optim': False,
-        'FedAlgo': 'FedProx-0.01', #Alternatives: FedAvg, FedProx-0.01, FedDyn-0.01, FedProx-0.005, FedDyn-0.005 and FedStats
+        'enable_optim': True,
+        'FedAlgo': 'FedAvg', #Alternatives: FedAvg, FedProx-0.01, FedDyn-0.01, FedProx-0.005, FedDyn-0.005 and FedStats
         'logdir': '/home/wbkou/AAAI/HFL-DynaCoeffi/logs'
 }
 

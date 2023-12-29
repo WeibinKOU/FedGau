@@ -178,8 +178,8 @@ semSeg = {
         'EAI': 2,
         'CAI': 3,
         'GPU_ID': 0,
-        'enable_optim': False,
-        'FedAlgo': 'FedProx-0.01', #Alternatives: FedAvg, FedProx-0.01, FedDyn-0.01, FedProx-0.005, FedDyn-0.005 and FedStats
+        'enable_optim': True,
+        'FedAlgo': 'FedAvg', #Alternatives: FedAvg, FedProx-0.01, FedDyn-0.01, FedProx-0.005, FedDyn-0.005 and FedStats
         'logdir': '/home/wbkou/AAAI/HFL-DynaCoeffi/logs'
 }
 

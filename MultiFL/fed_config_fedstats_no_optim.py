@@ -20,8 +20,8 @@ task = 'semSeg' #alternatives: semSeg, objDect, classification
 semSeg = {
         'Edge0' : #Northern Germany
         {
-            'agg_coef': 0.363, #cityscapes fedavg
-            #'agg_coef': 0.41, #cityscapes fedstats
+            #'agg_coef': 0.363, #cityscapes fedavg
+            'agg_coef': 0.41, #cityscapes fedstats
             #'agg_coef': 0.41, #Mapillary fedavg
             #'agg_coef': 0.45, #Mapillary fedstats
             #'agg_coef': 0.51, #NIID CamVid fedavg
@@ -32,11 +32,11 @@ semSeg = {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client4/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client4/',
                 'lr': 0.0001,
-                'batch_size': 4,
+                'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.535, #cityscapes fedavg
-                #'agg_coef': 0.41, #cityscapes fedstats
+                #'agg_coef': 0.535, #cityscapes fedavg
+                'agg_coef': 0.41, #cityscapes fedstats
                 #'agg_coef': 0.58, #Mapillary fedavg
                 #'agg_coef': 0.79, #Mapillary fedstats
                 #'agg_coef': 0.16, #NIID CamVid fedavg
@@ -49,11 +49,11 @@ semSeg = {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client6/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client6/',
                 'lr': 0.0001,
-                'batch_size': 4,
+                'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.265, #cityscapes fedavg
-                #'agg_coef': 0.44, #cityscapes fedstats
+                #'agg_coef': 0.265, #cityscapes fedavg
+                'agg_coef': 0.44, #cityscapes fedstats
                 #'agg_coef': 0.11, #Mapillary fedavg
                 #'agg_coef': 0.05, #Mapillary fedstats
                 #'agg_coef': 0.37, #NIID CamVid fedavg
@@ -66,11 +66,11 @@ semSeg = {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client7/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client7/',
                 'lr': 0.0001,
-                'batch_size': 4,
+                'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.201, #cityscapes fedavg
-                #'agg_coef': 0.15, #cityscapes fedstats
+                #'agg_coef': 0.201, #cityscapes fedavg
+                'agg_coef': 0.15, #cityscapes fedstats
                 #'agg_coef': 0.31, #Mapillary fedavg
                 #'agg_coef': 0.16, #Mapillary festats
                 #'agg_coef': 0.48, #NIID CamVid fedavg
@@ -80,8 +80,8 @@ semSeg = {
 
         'Edge1': # Rhine-Ruhr Region
         {
-            'agg_coef': 0.352, #cityscapes fedavg
-            #'agg_coef': 0.11, #cityscapes festats
+            #'agg_coef': 0.352, #cityscapes fedavg
+            'agg_coef': 0.11, #cityscapes festats
             #'agg_coef': 0.24, #Mapillary fedavg
             #'agg_coef': 0.20, #Mapillary fedstats
             #'agg_coef': 0.28, #NIID CamVid fedavg
@@ -92,11 +92,11 @@ semSeg = {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client1/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client1/',
                 'lr': 0.0001,
-                'batch_size': 4,
+                'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.560, #cityscapes fedavg
-                #'agg_coef': 0.61, #cityscapes fedstats
+                #'agg_coef': 0.560, #cityscapes fedavg
+                'agg_coef': 0.61, #cityscapes fedstats
                 #'agg_coef': 0.77, #Mapillary fesavg
                 #'agg_coef': 0.94, #Mapillary fedstats
                 #'agg_coef': 0.43, #NIID CamVid fedavg
@@ -109,11 +109,11 @@ semSeg = {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client2/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client2/',
                 'lr': 0.0001,
-                'batch_size': 4,
+                'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.440, #cityscapes fedavg
-                #'agg_coef': 0.39, #cityscapes fedstats
+                #'agg_coef': 0.440, #cityscapes fedavg
+                'agg_coef': 0.39, #cityscapes fedstats
                 #'agg_coef': 0.23, #Mapillary fedavg
                 #'agg_coef': 0.06, #Mapillary fedstats
                 #'agg_coef': 0.57, #NIID CamVid fedavg
@@ -123,8 +123,8 @@ semSeg = {
 
         'Edge2': #Western Germany - Cental
         {
-            'agg_coef': 0.285, #cityscapes fedavg
-            #'agg_coef': 0.48, #cityscapes fedstats
+            #'agg_coef': 0.285, #cityscapes fedavg
+            'agg_coef': 0.48, #cityscapes fedstats
             #'agg_coef': 0.35, #Mapillary fedavg
             #'agg_coef': 0.35, #Mapillary fedstats
             #'agg_coef': 0.21, #NIID CamVid fedavg
@@ -135,11 +135,11 @@ semSeg = {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client3/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client3/',
                 'lr': 0.0001,
-                'batch_size': 4,
+                'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.652, #cityscapes fedavg
-                #'agg_coef': 0.90, #cityscapes fedstats
+                #'agg_coef': 0.652, #cityscapes fedavg
+                'agg_coef': 0.90, #cityscapes fedstats
                 #'agg_coef': 0.29, #Mapillary fedavg
                 #'agg_coef': 0.12, #Mapillary fedstats
                 #'agg_coef': 0.38, #NIID CamVid fedavg
@@ -152,11 +152,11 @@ semSeg = {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client5/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client5/',
                 'lr': 0.0001,
-                'batch_size': 4,
+                'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
-                'agg_coef': 0.348, #cityscapes fedavg
-                #'agg_coef': 0.10, #cityscapes fedstats
+                #'agg_coef': 0.348, #cityscapes fedavg
+                'agg_coef': 0.10, #cityscapes fedstats
                 #'agg_coef': 0.71, #Mapillary fedavg
                 #'agg_coef': 0.88, #Mapillary fedstats
                 #'agg_coef': 0.62, #NIID CamVid fedavg
@@ -169,17 +169,17 @@ semSeg = {
             'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/test/',
             #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/test/',
             #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/test/',
-            'batch_size': 4,
+            'batch_size': 8,
         },
 
-        'model': SegNet,
+        'model': DeepLabv3,
         'dataset': 'cityscapes',  #Alternatives: Mapillary, cityscapes, CamVid
         'global_round': 50,
-        'EAI': 2,
-        'CAI': 3,
+        'EAI': 3,
+        'CAI': 2,
         'GPU_ID': 0,
         'enable_optim': False,
-        'FedAlgo': 'FedProx-0.01', #Alternatives: FedAvg, FedProx-0.01, FedDyn-0.01, FedProx-0.005, FedDyn-0.005 and FedStats
+        'FedAlgo': 'FedStats', #Alternatives: FedAvg, FedProx-0.01, FedDyn-0.01, FedProx-0.005, FedDyn-0.005 and FedStats
         'logdir': '/home/wbkou/AAAI/HFL-DynaCoeffi/logs'
 }
 
