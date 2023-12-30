@@ -4,8 +4,8 @@
 #cp MultiFL/fed_config_BiSeNet_fedavg_camvid_optim.py MultiFL/fed_config.py
 #python fed_train.py
 
-##cp MultiFL/fed_config_BiSeNet_fedavg_cityscapes_no_optim.py MultiFL/fed_config.py
-##python fed_train.py
+cp MultiFL/fed_config_BiSeNet_fedavg_cityscapes_no_optim.py MultiFL/fed_config.py
+python fed_train.py
 
 ##cp MultiFL/fed_config_BiSeNet_fedavg_cityscapes_optim.py MultiFL/fed_config.py
 ##python fed_train.py

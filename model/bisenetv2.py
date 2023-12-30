@@ -262,6 +262,7 @@ class BGALayer(nn.Module):
         right1 = self.right1(x_s)
         right2 = self.right2(x_s)
         right1 = self.up1(right1)
+        left1 = F.pad(left1, (0, 0, 1, 1), "constant", 0)
         left = left1 * torch.sigmoid(right1)
         right = left2 * torch.sigmoid(right2)
         right = self.up2(right)
@@ -318,11 +319,16 @@ class BiSeNetV2(nn.Module):
         feat_head = self.bga(feat_d, feat_s)
 
         logits = self.head(feat_head)
+        logits = F.interpolate(logits, size=size, mode='bilinear')
         if self.aux_mode == 'train':
             logits_aux2 = self.aux2(feat2)
+            logits_aux2 = F.interpolate(logits_aux2, size=size, mode='bilinear')
             logits_aux3 = self.aux3(feat3)
+            logits_aux3 = F.interpolate(logits_aux3, size=size, mode='bilinear')
             logits_aux4 = self.aux4(feat4)
+            logits_aux4 = F.interpolate(logits_aux4, size=size, mode='bilinear')
             logits_aux5_4 = self.aux5_4(feat5_4)
+            logits_aux5_4 = F.interpolate(logits_aux5_4, size=size, mode='bilinear')
             return logits, logits_aux2, logits_aux3, logits_aux4, logits_aux5_4
         elif self.aux_mode == 'test':
             return logits
