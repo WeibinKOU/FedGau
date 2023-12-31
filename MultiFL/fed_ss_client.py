@@ -61,7 +61,7 @@ class SemSegClient():
         if 'FedAlgo' not in self.config:
             self.mu = 0.0
             self.alpha = 0.0
-        elif self.config['FedAlgo'] == 'FedAvg' or self.config['FedAlgo'] == 'FedStats':
+        elif self.config['FedAlgo'] == 'FedAvg' or self.config['FedAlgo'] == 'FedStats' or 'FedAvgM' in self.config['FedAlgo']:
             self.mu = 0.0
             self.alpha = 0.0
         elif 'FedProx' in self.config['FedAlgo']:

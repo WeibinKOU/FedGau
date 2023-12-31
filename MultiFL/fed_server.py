@@ -64,6 +64,8 @@ class EdgeServer():
         self.fed_cnt = 0
 
         self.clients_dict = {}
+        self.clients_dict_last = None
+        self.clients_v_last = None
         self.avgModel = None
 
         self.clients = []
@@ -78,16 +80,28 @@ class EdgeServer():
 
     def FedAgg(self):
         w_avg = {key: 0.0 for key in self.clients_dict['Agent0'].keys()}
+        v_tmp = {key: 0.0 for key in self.clients_dict['Agent0'].keys()}
+        if 'FedAvgM' in self.config['FedAlgo']:
+            if self.clients_v_last is None:
+                self.clients_v_last = {key: 0.0 for key in self.clients_dict['Agent0'].keys()}
+
+            beta = float(self.config['FedAlgo'].split('-')[-1])
+            for k in w_avg.keys():
+                v_tmp[k] = beta * self.clients_v_last[k]
+                if self.clients_dict_last is not None:
+                    for i in range(0, len(self.clients_dict)):
+                        v_tmp[k] += self.config[self.id]['Agent' + str(i)]['agg_coef'] * (self.clients_dict['Agent' + str(i)][k] - self.clients_dict_last['Agent' + str(i)][k])
+
         for k in w_avg.keys():
             for i in range(0, len(self.clients_dict)):
                 w_avg[k] += self.config[self.id]['Agent' + str(i)]['agg_coef'] * self.clients_dict['Agent' + str(i)][k]
-            #w_avg[k] = torch.div(w_avg[k], len(self.clients_dict))
+            w_avg[k] -= v_tmp[k]
+
+        if 'FedAvgM' in self.config['FedAlgo']:
+            self.clients_v_last = v_tmp
+            self.clients_dict_last = self.clients_dict
 
         self.avgModel = copy.deepcopy(w_avg)
-        if 'Nonlinear' in self.config:
-            for k, v in self.avgModel.items():
-                self.avgModel[k] = self.config['Nonlinear'](v)
-
         self.model.load_state_dict(self.avgModel)
 
         if self.task == 'semSeg':
@@ -233,7 +247,11 @@ class CloudServer():
         self.avgModel = copy.deepcopy(self.model.state_dict())
 
         self.edges_num = sum('Edge' in key for key in self.config)
+
         self.edges_dict = {}
+        self.edges_dict_last = None
+        self.edges_v_last = None
+
         self.logdir = self.config['logdir']
         self.time_str = datetime.datetime.strftime(datetime.datetime.now(),'%Y_%m_%d_%H_%M_%S')
         logruns = 'runs/' if 'Nonlinear' not in self.config else self.config['Nonlinear'].__name__ + '_runs/'
@@ -258,6 +276,7 @@ class CloudServer():
         self.last_perf = 0.0
         self.curr_perf = 0.0
         self.traffic = 0
+
 
     def run(self):
         save_path = self.logdir + '/' + self.task + '/' + self.time_str + '/' + 'checkpoints/'
@@ -294,16 +313,28 @@ class CloudServer():
             edge.FedAgg()
 
         w_avg = {key: 0.0 for key in self.edges_dict['Edge0'].keys()}
+        v_tmp = {key: 0.0 for key in self.edges_dict['Edge0'].keys()}
+        if 'FedAvgM' in self.config['FedAlgo']:
+            if self.edges_v_last is None:
+                self.edges_v_last = {key: 0.0 for key in self.edges_dict['Edge0'].keys()}
+
+            beta = float(self.config['FedAlgo'].split('-')[-1])
+            for k in w_avg.keys():
+                v_tmp[k] = beta * self.edges_v_last[k]
+                if self.edges_dict_last is not None:
+                    for i in range(0, len(self.edges_dict)):
+                        v_tmp[k] += self.config['Edge' + str(i)]['agg_coef'] * (self.edges_dict['Edge' + str(i)][k] - self.edges_dict_last['Edge' + str(i)][k])
+
         for k in w_avg.keys():
             for i in range(0, len(self.edges_dict)):
                 w_avg[k] += self.config['Edge' + str(i)]['agg_coef'] * self.edges_dict['Edge' + str(i)][k]
-            #w_avg[k] = torch.div(w_avg[k], len(self.edges_dict))
+            w_avg[k] -= v_tmp[k]
+
+        if 'FedAvgM' in self.config['FedAlgo']:
+            self.edges_v_last = v_tmp
+            self.edges_dict_last = self.edges_dict
 
         self.avgModel = copy.deepcopy(w_avg)
-        if 'Nonlinear' in self.config:
-            for k, v in self.avgModel.items():
-                self.avgModel[k] = self.config['Nonlinear'](v)
-
         self.model.load_state_dict(self.avgModel)
 
         if self.task == 'semSeg':

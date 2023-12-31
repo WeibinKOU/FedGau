@@ -172,14 +172,14 @@ semSeg = {
             'batch_size': 4,
         },
 
-        'model': BiSeNetV2,
+        'model': SegNet,
         'dataset': 'CamVid',  #Alternatives: Mapillary, cityscapes, CamVid
         'global_round': 50,
         'EAI': 2,
         'CAI': 3,
         'GPU_ID': 0,
         'enable_optim': False,
-        'FedAlgo': 'FedAvgM-0.7', #Alternatives: FedAvg, FedProx-0.01, FedDyn-0.01, FedProx-0.005, FedDyn-0.005, FedStats, FedAvgM-0.7, FedAvgM-0.9
+        'FedAlgo': 'FedAvgM-0.9', #Alternatives: FedAvg, FedProx-0.01, FedDyn-0.01, FedProx-0.005, FedDyn-0.005, FedStats, FedAvgM-0.7, FedAvgM-0.9
         'logdir': '/home/wbkou/AAAI/HFL-DynaCoeffi/logs'
 }
 
