@@ -1,6 +1,7 @@
 import numpy as np
 import torch.nn as nn
 import torch
+from torch import autograd
 import torch.nn.functional as F
 from torch.utils.data import DataLoader
 import torch.backends.cudnn as cudnn
@@ -64,7 +65,7 @@ class SemSegClient():
         if 'FedAlgo' not in self.config:
             self.mu = 0.0
             self.alpha = 0.0
-        elif self.config['FedAlgo'] == 'FedAvg' or self.config['FedAlgo'] == 'FedStats' or 'FedAvgM' in self.config['FedAlgo'] or self.config['FedAlgo'] == 'FedIR':
+        elif self.config['FedAlgo'] == 'FedAvg' or self.config['FedAlgo'] == 'FedStats' or 'FedAvgM' in self.config['FedAlgo'] or self.config['FedAlgo'] == 'FedIR' or 'FedCurv' in self.config['FedAlgo']:
             self.mu = 0.0
             self.alpha = 0.0
         elif 'FedProx' in self.config['FedAlgo']:
@@ -139,6 +140,12 @@ class SemSegClient():
             weights = counts / total
             self.criterion = nn.CrossEntropyLoss(weight=weights, ignore_index=self.n_classes - 1).to(self.dev)
 
+        if 'FedCurv' in self.config['FedAlgo']:
+            self.fisher_lambda = float(self.config['FedAlgo'].split('-')[-1])
+            self.Pt = None
+            self.Qt = None
+            self.is_FedCurv_running = False
+
     def train(self):
         for epoch in range(self.config['EAI']):
             if self.updated_model is not None:
@@ -183,6 +190,11 @@ class SemSegClient():
                 lin_penalty = torch.sum(curr_params * self.prev_grads)
                 dist -= self.alpha * lin_penalty
 
+                if 'FedCurv' in self.config['FedAlgo'] and self.is_FedCurv_running:
+                    all_params = self.flatten_weights(self.model, numpy_output=False)
+                    reg_loss = self.fisher_lambda * torch.inner(self.Pt, torch.square(all_params)) - self.fisher_lambda * 2.0 * torch.inner(self.Qt, all_params)
+                    dist += reg_loss
+
                 dist.backward()
                 loss.update(dist.item())
                 self.optim.step()
@@ -220,3 +232,43 @@ class SemSegClient():
                     self.delta_ce = math.sqrt(grad_diff.norm(2).item())
                     self.beta = self.delta_ce / (math.sqrt(diff_term) + 1e-6)
                     del grad_diff
+
+                if 'FedCurv' in self.config['FedAlgo']:
+                    #with torch.no_grad():
+                    self.calc_local_fisher()
+
+
+    def flatten_weights(self, model, numpy_output=True):
+        all_params = []
+        for param in model.parameters():
+            all_params.append(param.view(-1))
+
+        all_params = torch.cat(all_params)
+        if numpy_output:
+            return all_params.cpu().detach().numpy()
+
+        return all_params
+
+    def calc_local_fisher(self):
+        local_params = self.flatten_weights(self.model, numpy_output=False).clone().detach()
+        fisher_list = []
+
+        for imgs, masks, _ in tqdm(self.dataloader):
+            batch_size = len(masks)
+
+            data, targets = imgs.to(self.dev), masks.to(self.dev)
+
+            *logits, = self.model_train(imgs.to(self.dev))
+            pred_masks = [F.softmax(logit, dim=1) for logit in logits]
+            crit = [self.criterion(pred_mask, masks.to(self.dev)) for pred_mask in pred_masks]
+            crit = sum(crit)
+
+            grad = autograd.grad(crit, self.model.parameters())
+            all_grad_eles = []
+            for elewise in grad:
+                all_grad_eles.append(elewise.view(-1))
+            all_grad_eles = torch.cat(all_grad_eles)
+            fisher_list.append(torch.square(all_grad_eles.clone().detach()))
+
+        self.Pt = torch.mean(torch.stack(fisher_list), dim=0).clone().detach()
+        self.Qt = torch.mul(self.Pt, local_params).clone().detach()

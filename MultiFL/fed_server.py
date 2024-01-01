@@ -101,6 +101,27 @@ class EdgeServer():
             self.clients_v_last = v_tmp
             self.clients_dict_last = self.clients_dict
 
+        if 'FedCurv' in self.config['FedAlgo']:
+            Pt = []
+            Qt = []
+            for i in range(self.clients_num):
+                uts = []
+                vts = []
+
+                self.clients[i].is_FedCurv_running = True
+                for j in range(self.clients_num):
+                    if i != j:
+                        uts.append(self.clients[j].Pt)
+                        vts.append(self.clients[j].Qt)
+
+                with torch.no_grad():
+                    Pt.append(torch.sum(torch.stack(uts), dim=0))
+                    Qt.append(torch.sum(torch.stack(vts), dim=0))
+
+            for i in range(self.clients_num):
+                self.clients[i].Pt = Pt[i]
+                self.clients[i].Qt = Qt[i]
+
         self.avgModel = copy.deepcopy(w_avg)
         self.model.load_state_dict(self.avgModel)
 
