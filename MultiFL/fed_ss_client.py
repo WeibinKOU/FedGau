@@ -37,16 +37,19 @@ class SemSegClient():
             self.test_dataset = Dataset(self.config['test']['dataset'], num_classes=20, type_='test')
             self.criterion = nn.CrossEntropyLoss(ignore_index=19).to(self.dev)
             self.model = self.config['model'](n_classes=20).to(self.dev)
+            self.n_classes = 20
         elif self.config['dataset'] == 'Mapillary':
             self.dataset = Dataset(self.config[self.eid][self.cid]['dataset'], num_classes=66)
             self.test_dataset = Dataset(self.config['test']['dataset'], num_classes=66, type_='test')
             self.criterion = nn.CrossEntropyLoss(ignore_index=65).to(self.dev)
             self.model = self.config['model'](n_classes=66).to(self.dev)
+            self.n_classes = 66
         elif self.config['dataset'] == 'CamVid':
             self.dataset = Dataset(self.config[self.eid][self.cid]['dataset'], num_classes=12)
             self.test_dataset = Dataset(self.config['test']['dataset'], num_classes=12, type_='test')
             self.criterion = nn.CrossEntropyLoss(ignore_index=11).to(self.dev)
             self.model = self.config['model'](n_classes=12).to(self.dev)
+            self.n_classes = 12
         else:
             print('Dataset %s is not supported!'%self.config['dataset'])
             exit()
@@ -61,7 +64,7 @@ class SemSegClient():
         if 'FedAlgo' not in self.config:
             self.mu = 0.0
             self.alpha = 0.0
-        elif self.config['FedAlgo'] == 'FedAvg' or self.config['FedAlgo'] == 'FedStats' or 'FedAvgM' in self.config['FedAlgo']:
+        elif self.config['FedAlgo'] == 'FedAvg' or self.config['FedAlgo'] == 'FedStats' or 'FedAvgM' in self.config['FedAlgo'] or self.config['FedAlgo'] == 'FedIR':
             self.mu = 0.0
             self.alpha = 0.0
         elif 'FedProx' in self.config['FedAlgo']:
@@ -124,6 +127,17 @@ class SemSegClient():
                                       lr=self.lr,
                                       betas=self.betas,
                                       weight_decay=self.weight_decay)
+
+        if self.config['FedAlgo'] == 'FedIR':
+            total = 0
+            counts = torch.zeros(self.n_classes)
+            for _, masks, _ in tqdm(self.dataloader):
+                masks = masks.view(-1)
+                total += masks.size(0)
+                counts += torch.bincount(masks, minlength=self.n_classes)
+
+            weights = counts / total
+            self.criterion = nn.CrossEntropyLoss(weight=weights, ignore_index=self.n_classes - 1).to(self.dev)
 
     def train(self):
         for epoch in range(self.config['EAI']):

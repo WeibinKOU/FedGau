@@ -262,7 +262,8 @@ class BGALayer(nn.Module):
         right1 = self.right1(x_s)
         right2 = self.right2(x_s)
         right1 = self.up1(right1)
-        left1 = F.pad(left1, (0, 0, 1, 1), "constant", 0)
+        if left1.shape != right1.shape:
+            left1 = F.pad(left1, (0, 0, 1, 1), "constant", 0)
         left = left1 * torch.sigmoid(right1)
         right = left2 * torch.sigmoid(right2)
         right = self.up2(right)
