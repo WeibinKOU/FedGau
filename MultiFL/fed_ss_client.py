@@ -66,7 +66,7 @@ class SemSegClient():
         if 'FedAlgo' not in self.config:
             self.mu = 0.0
             self.alpha = 0.0
-        elif self.config['FedAlgo'] == 'FedAvg' or self.config['FedAlgo'] == 'FedStats' or 'FedAvgM' in self.config['FedAlgo'] or self.config['FedAlgo'] == 'FedIR' or 'FedCurv' in self.config['FedAlgo'] or self.config['FedAlgo'] == 'MOON':
+        elif self.config['FedAlgo'] == 'FedAvg' or self.config['FedAlgo'] == 'FedStats' or 'FedAvgM' in self.config['FedAlgo'] or self.config['FedAlgo'] == 'FedIR' or 'FedCurv' in self.config['FedAlgo'] or self.config['FedAlgo'] == 'MOON' or self.config['FedAlgo'] == 'SCAFFOLD':
             self.mu = 0.0
             self.alpha = 0.0
         elif 'FedProx' in self.config['FedAlgo']:
@@ -90,10 +90,6 @@ class SemSegClient():
         self.epochs = self.config['global_round'] * self.config['EAI'] * self.config['CAI']
 
         self.updated_model = None
-        self.epoch_cnt = 0
-        self.eval_loss = 0.0
-        self.delta_ce = 0.0
-        self.rho = 0.0
 
         self.prev_grads = None
         for param in self.model.parameters():
@@ -151,6 +147,15 @@ class SemSegClient():
             self.dg_model = copy.deepcopy(self.model)
             self.prev_model = copy.deepcopy(self.model)
 
+        if 'SCAFFOLD' == self.config['FedAlgo']:
+            self.scfd_c = torch.from_numpy(self.flatten_weights(self.model)).fill_(0)
+            self.scfd_c_i = self.scfd_c
+            self.scfd_ud_amt = None
+            self.scfd_step_cnt = 0
+            self.scfd_rho = self.optim.param_groups[0]['betas'][0]
+            self.scfd_lr = self.optim.param_groups[0]['lr']
+            self.adaptive_divison = True
+
     def train(self):
         for epoch in range(self.config['EAI']):
             if self.updated_model is not None:
@@ -158,8 +163,9 @@ class SemSegClient():
                 self.fedprox_model.load_state_dict(self.updated_model)
                 self.updated_model = None
 
-                if 'MOON' == self.config['FedAlgo']:
+                if 'MOON' == self.config['FedAlgo'] or 'SCAFFOLD' == self.config['FedAlgo']:
                     self.dg_model = copy.deepcopy(self.model)
+                    self.scfd_step_cnt = 0
 
                 self.prev_grads = None
                 for param in self.model.parameters():
@@ -173,6 +179,7 @@ class SemSegClient():
 
             loss = AverageMeter()
             diff_term = 0.0
+
             for imgs, masks, names in tqdm(self.dataloader):
                 if 'MOON' == self.config['FedAlgo']:
                     *logits, z = self.model_train(imgs.to(self.dev), get_feats=True)
@@ -211,6 +218,16 @@ class SemSegClient():
 
                 dist.backward()
                 loss.update(dist.item())
+
+                if 'SCAFFOLD' == self.config['FedAlgo']:
+                    self.scfd_c_i = self.scfd_c_i.to(self.dev)
+                    self.scfd_c = self.scfd_c.to(self.dev)
+                    grad_batch = self.flatten_grads(self.model).detach().clone()
+                    self.optim.zero_grad()
+                    grad_batch = grad_batch - self.scfd_c_i + self.scfd_c
+                    self.model = self.assign_grads(self.model, grad_batch)
+                    self.scfd_step_cnt += 1
+
                 self.optim.step()
 
                 self.prev_grads = None
@@ -220,6 +237,7 @@ class SemSegClient():
                     else:
                         self.prev_grads = torch.cat((self.prev_grads, param.grad.view(-1).clone()), dim=0)
                 self.grad = self.prev_grads
+
 
             cid = "%s.%s" % (self.eid, self.cid)
             log_info = "[Epoch: %d/%d] [%s.Train.Loss: %f]" % (self.epoch_cnt, self.epochs, cid, loss.avg)
@@ -254,6 +272,12 @@ class SemSegClient():
                 if 'MOON' == self.config['FedAlgo']:
                     self.prev_model = copy.deepcopy(self.model)
 
+                if 'SCAFFOLD' == self.config['FedAlgo']:
+                    self.update_control_variate()
+                    #print('step counts: ', self.scfd_step_cnt)
+                    #print('c_i: ', self.scfd_c_i)
+                    #print('c_amount: ', self.scfd_ud_amt)
+                    self.scfd_step_cnt = 0
 
     def flatten_weights(self, model, numpy_output=True):
         all_params = []
@@ -289,3 +313,52 @@ class SemSegClient():
 
         self.Pt = torch.mean(torch.stack(fisher_list), dim=0).clone().detach()
         self.Qt = torch.mul(self.Pt, local_params).clone().detach()
+
+    def flatten_grads(self, model):
+        all_grads = []
+        for name, param in model.named_parameters():
+            all_grads.append(param.grad.view(-1))
+        return torch.cat(all_grads)
+
+    def assign_grads(self, model, grads):
+        state_dict = model.state_dict(keep_vars=True)
+        index = 0
+        for param in state_dict.keys():
+            # ignore batchnorm params
+            if ("running_mean" in param or "running_var" in param or "num_batches_tracked" in param):
+                continue
+
+            param_count = state_dict[param].numel()
+            param_shape = state_dict[param].shape
+            state_dict[param].grad = grads[index : index + param_count].view(param_shape).clone()
+            index += param_count
+        model.load_state_dict(state_dict)
+        return model
+
+    def get_divisor(self):
+        local_lr = self.scfd_lr
+        K = self.scfd_step_cnt
+        rho = self.scfd_rho
+
+        new_K = (K - rho * (1.0 - pow(rho, K)) / (1.0 - rho)) / (1.0 - rho)
+
+        if self.adaptive_divison:
+            divisor = 1.0 / (new_K * local_lr)
+        else:
+            divisor = 1.0 / (K * local_lr)
+
+        return divisor
+
+    @torch.no_grad()
+    def update_control_variate(self):
+        divisor = self.get_divisor()
+
+        server_params = self.flatten_weights(self.dg_model)
+        local_params = self.flatten_weights(self.model)
+        param_move = server_params - local_params
+
+        c_i_plus = self.scfd_c_i.cpu() - self.scfd_c.cpu() + divisor * param_move
+        c_update_amount = c_i_plus - self.scfd_c_i.cpu()
+
+        self.scfd_c_i = c_i_plus
+        self.scfd_ud_amt = c_update_amount

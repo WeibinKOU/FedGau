@@ -172,11 +172,11 @@ semSeg = {
             'batch_size': 4,
         },
 
-        'model': BiSeNetV2,
+        'model': SegNet,
         'dataset': 'CamVid',  #Alternatives: Mapillary, cityscapes, CamVid
         'global_round': 50,
-        'EAI': 3,
-        'CAI': 2,
+        'EAI': 2,
+        'CAI': 3,
         'GPU_ID': 0,
         'enable_optim': False,
         'FedAlgo': 'SCAFFOLD', #Alternatives: FedAvg, FedProx-0.01, FedDyn-0.01, FedProx-0.005, FedDyn-0.005, FedStats, FedCurv-1.0, MOON, SCAFFOLD

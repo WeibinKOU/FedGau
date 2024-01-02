@@ -64,8 +64,6 @@ class EdgeServer():
         self.fed_cnt = 0
 
         self.clients_dict = {}
-        self.clients_dict_last = None
-        self.clients_v_last = None
         self.avgModel = None
 
         self.clients = []
@@ -73,6 +71,14 @@ class EdgeServer():
             cid = 'Agent'+str(i)
             self.clients.append(self.agent(self.id, cid, self.config, self.clients_dict, tensorboard, self.dev, self.time_str))
             print('%s.%s has been initialized!' % (self.id, cid))
+
+        if 'FedAvgM' in self.config['FedAlgo']:
+            self.clients_dict_last = None
+            self.clients_v_last = None
+
+        if 'SCAFFOLD' == self.config['FedAlgo']:
+            self.sample_ratio = 0.1
+            self.global_c = None
 
     def run(self):
         for i in range(self.clients_num):
@@ -121,6 +127,20 @@ class EdgeServer():
             for i in range(self.clients_num):
                 self.clients[i].Pt = Pt[i]
                 self.clients[i].Qt = Qt[i]
+
+        if 'SCAFFOLD' == self.config['FedAlgo']:
+            ud_amt_list = []
+            for i in range(self.clients_num):
+                ud_amt_list.append(self.clients[i].scfd_ud_amt)
+
+            with torch.no_grad():
+                if self.global_c is None:
+                    self.global_c = self.clients[0].scfd_ud_amt.fill_(0)
+                ud_amt_mean = torch.stack(ud_amt_list).mean(dim=0)
+                self.global_c += self.sample_ratio * ud_amt_mean
+
+                for i in range(self.clients_num):
+                    self.clients[i].scfd_c = self.global_c
 
         self.avgModel = copy.deepcopy(w_avg)
         self.model.load_state_dict(self.avgModel)
