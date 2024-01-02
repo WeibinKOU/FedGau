@@ -174,7 +174,7 @@ semSeg = {
 
         'model': SegNet,
         'dataset': 'cityscapes',  #Alternatives: Mapillary, cityscapes, CamVid
-        'global_round': 50,
+        'global_round': 40,
         'EAI': 3,
         'CAI': 2,
         'GPU_ID': 0,
@@ -292,7 +292,7 @@ objDect = {
         },
 
         'model': FasterRCNN,
-        'global_round': 50,
+        'global_round': 40,
         'EAI': 3,
         'CAI': 2,
         'GPU_ID': 0,
@@ -402,7 +402,7 @@ classi = {
         },
 
         'model': ResNet18,
-        'global_round': 50,
+        'global_round': 40,
         'EAI': 3,
         'CAI': 2,
         'GPU_ID': 0,
