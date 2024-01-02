@@ -313,7 +313,7 @@ class BiSeNetV2(nn.Module):
             self.aux4 = SegmentHead(64, 128, n_classes, up_factor=16)
             self.aux5_4 = SegmentHead(128, 128, n_classes, up_factor=32)
 
-    def forward(self, x):
+    def forward(self, x, get_feats=False):
         size = x.size()[2:]
         feat_d = self.detail(x)
         feat2, feat3, feat4, feat5_4, feat_s = self.segment(x)
@@ -330,6 +330,8 @@ class BiSeNetV2(nn.Module):
             logits_aux4 = F.interpolate(logits_aux4, size=size, mode='bilinear')
             logits_aux5_4 = self.aux5_4(feat5_4)
             logits_aux5_4 = F.interpolate(logits_aux5_4, size=size, mode='bilinear')
+            if get_feats:
+                return logits, logits_aux2, logits_aux3, logits_aux4, logits_aux5_4, feat_head
             return logits, logits_aux2, logits_aux3, logits_aux4, logits_aux5_4
         elif self.aux_mode == 'test':
             return logits

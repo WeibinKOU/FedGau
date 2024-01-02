@@ -83,7 +83,7 @@ class SegNet(nn.Module):
         self.ConvDe11 = nn.Conv2d(64, self.out_chn, kernel_size=3, padding=1)
         self.BNDe11 = nn.BatchNorm2d(self.out_chn, momentum=BN_momentum)
 
-    def forward(self, x):
+    def forward(self, x, get_feats=False):
 
         #ENCODE LAYERS
         #Stage 1
@@ -145,10 +145,12 @@ class SegNet(nn.Module):
 
         #Stage 1
         x = self.MaxDe(x, ind1)
-        x = F.relu(self.BNDe12(self.ConvDe12(x)))
-        x = self.ConvDe11(x)
+        x_f = F.relu(self.BNDe12(self.ConvDe12(x)))
+        x = self.ConvDe11(x_f)
 
         if self.aux_mode == 'train':
+            if get_feats:
+                return x, x_f
             return x,
         elif self.aux_mode == 'test':
             return x

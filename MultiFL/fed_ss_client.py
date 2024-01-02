@@ -22,6 +22,7 @@ from data import Dataset
 from config import *
 from utils.average_meter import AverageMeter
 from utils.util_semseg import SS_Evaluate
+from utils.moon_criterion import MOONLoss
 
 class SemSegClient():
     def __init__(self, server_id, client_id, config, clients_dict, tensorboard, dev, time_str):
@@ -65,7 +66,7 @@ class SemSegClient():
         if 'FedAlgo' not in self.config:
             self.mu = 0.0
             self.alpha = 0.0
-        elif self.config['FedAlgo'] == 'FedAvg' or self.config['FedAlgo'] == 'FedStats' or 'FedAvgM' in self.config['FedAlgo'] or self.config['FedAlgo'] == 'FedIR' or 'FedCurv' in self.config['FedAlgo']:
+        elif self.config['FedAlgo'] == 'FedAvg' or self.config['FedAlgo'] == 'FedStats' or 'FedAvgM' in self.config['FedAlgo'] or self.config['FedAlgo'] == 'FedIR' or 'FedCurv' in self.config['FedAlgo'] or self.config['FedAlgo'] == 'MOON':
             self.mu = 0.0
             self.alpha = 0.0
         elif 'FedProx' in self.config['FedAlgo']:
@@ -107,7 +108,6 @@ class SemSegClient():
         self.weight_decay = self.config[self.eid][self.cid]['weight_decay']
         self.epochs = self.config['global_round'] * self.config['EAI'] * self.config['CAI']
 
-        self.updated_model = None
         self.epoch_cnt = 0
         self.eval_loss = 0.0
         self.delta_ce = 0.0
@@ -146,12 +146,20 @@ class SemSegClient():
             self.Qt = None
             self.is_FedCurv_running = False
 
+        if 'MOON' == self.config['FedAlgo']:
+            self.criterion = MOONLoss(ign_idx=self.n_classes - 1).to(self.dev)
+            self.dg_model = copy.deepcopy(self.model)
+            self.prev_model = copy.deepcopy(self.model)
+
     def train(self):
         for epoch in range(self.config['EAI']):
             if self.updated_model is not None:
                 self.model.load_state_dict(self.updated_model)
                 self.fedprox_model.load_state_dict(self.updated_model)
                 self.updated_model = None
+
+                if 'MOON' == self.config['FedAlgo']:
+                    self.dg_model = copy.deepcopy(self.model)
 
                 self.prev_grads = None
                 for param in self.model.parameters():
@@ -166,10 +174,16 @@ class SemSegClient():
             loss = AverageMeter()
             diff_term = 0.0
             for imgs, masks, names in tqdm(self.dataloader):
-                *logits, = self.model_train(imgs.to(self.dev))
-                pred_masks = [F.softmax(logit, dim=1) for logit in logits]
-                dist = [self.criterion(pred_mask, masks.to(self.dev)) for pred_mask in pred_masks]
-                dist = sum(dist)
+                if 'MOON' == self.config['FedAlgo']:
+                    *logits, z = self.model_train(imgs.to(self.dev), get_feats=True)
+                    *logits_prev, z_prev = self.prev_model(imgs.to(self.dev), get_feats=True)
+                    *logits_g, z_g = self.dg_model(imgs.to(self.dev), get_feats=True)
+                    dist = self.criterion(logits, masks.to(self.dev), z, z_prev, z_g)
+                else:
+                    *logits, = self.model_train(imgs.to(self.dev))
+                    pred_masks = [F.softmax(logit, dim=1) for logit in logits]
+                    dist = [self.criterion(pred_mask, masks.to(self.dev)) for pred_mask in pred_masks]
+                    dist = sum(dist)
                 self.optim.zero_grad()
 
                 proximal_term = 0.0
@@ -234,8 +248,11 @@ class SemSegClient():
                     del grad_diff
 
                 if 'FedCurv' in self.config['FedAlgo']:
-                    #with torch.no_grad():
                     self.calc_local_fisher()
+
+
+                if 'MOON' == self.config['FedAlgo']:
+                    self.prev_model = copy.deepcopy(self.model)
 
 
     def flatten_weights(self, model, numpy_output=True):

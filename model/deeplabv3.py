@@ -117,14 +117,16 @@ class DeepLabv3(nn.Module):
         self.conv = nn.Conv2d(in_channels = 256, out_channels = self.nc,
                           kernel_size = 1, stride=1, padding=0)
 
-    def forward(self, x):
+    def forward(self, x, get_feats=False):
         _, _, h, w = x.shape
         x = self.resnet(x)
         x = self.assp(x)
-        x = self.conv(x)
-        x = F.interpolate(x, size=(h, w), mode='bilinear')
+        x_f = self.conv(x)
+        x = F.interpolate(x_f, size=(h, w), mode='bilinear')
 
         if self.aux_mode == 'train':
+            if get_feats:
+                return x, x_f
             return x,
         elif self.aux_mode == 'test':
             return x
