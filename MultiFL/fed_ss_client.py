@@ -175,7 +175,7 @@ class SemSegClient():
                 self.updated_model = None
 
                 if 'MOON' == self.config['FedAlgo'] or 'SCAFFOLD' == self.config['FedAlgo']:
-                    self.dg_model.load_state_dict(self.model.state_dict())
+                    self.dg_model = copy.deepcopy(self.model)
                     self.scfd_step_cnt = 0
 
                 self.prev_grads = None

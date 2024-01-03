@@ -78,8 +78,7 @@ class EdgeServer():
 
         if 'SCAFFOLD' == self.config['FedAlgo']:
             self.sample_ratio = 1.0
-            self.global_c = torch.from_numpy(self.flatten_weights(self.model)).fill_(0)
-
+            self.global_c = None
 
     def run(self):
         for i in range(self.clients_num):
@@ -131,6 +130,9 @@ class EdgeServer():
 
         if 'SCAFFOLD' == self.config['FedAlgo']:
             with torch.no_grad():
+                if self.global_c is None:
+                    self.global_c = self.clients[0].scfd_ud_amt.fill_(0)
+
                 ud_amt_mean = self.clients[0].scfd_ud_amt.fill_(0)
                 for i in range(0, len(self.clients_dict)):
                     ud_amt_mean += self.config[self.id]['Agent' + str(i)]['agg_coef'] * self.clients[i].scfd_ud_amt
@@ -274,15 +276,6 @@ class EdgeServer():
 
         return ag_weights
 
-    def flatten_weights(self, model, numpy_output=True):
-        all_params = []
-        for param in model.parameters():
-            all_params.append(param.view(-1))
-
-        all_params = torch.cat(all_params)
-        if numpy_output:
-            return all_params.cpu().detach().numpy()
-
 class CloudServer():
     def __init__(self):
         import MultiFL.fed_config as config
@@ -354,13 +347,10 @@ class CloudServer():
         self.curr_perf = 0.0
         self.traffic = 0
 
-
         for edge in self.edges:
             edge.model.load_state_dict(self.model.state_dict())
             for client in edge.clients:
                 client.model.load_state_dict(self.model.state_dict())
-                if 'MOON' == self.config['FedAlgo'] or 'SCAFFOLD' == self.config['FedAlgo']:
-                    client.dg_model.load_state_dict(self.model.state_dict())
 
     def run(self):
         save_path = self.logdir + '/' + self.task + '/' + self.time_str + '/' + 'checkpoints/'
