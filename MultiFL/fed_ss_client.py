@@ -149,12 +149,12 @@ class SemSegClient():
 
         if 'SCAFFOLD' == self.config['FedAlgo']:
             self.scfd_c = torch.from_numpy(self.flatten_weights(self.model)).fill_(0)
-            self.scfd_c_i = self.scfd_c
+            self.scfd_c_i = copy.deepcopy(self.scfd_c)
             self.scfd_ud_amt = None
             self.scfd_step_cnt = 0
             self.scfd_rho = self.optim.param_groups[0]['betas'][0]
             self.scfd_lr = self.optim.param_groups[0]['lr']
-            self.adaptive_divison = True
+            self.adaptive_division = False
 
     def train(self):
         for epoch in range(self.config['EAI']):
@@ -223,7 +223,7 @@ class SemSegClient():
                     self.scfd_c_i = self.scfd_c_i.to(self.dev)
                     self.scfd_c = self.scfd_c.to(self.dev)
                     grad_batch = self.flatten_grads(self.model).detach().clone()
-                    self.optim.zero_grad()
+                    #self.optim.zero_grad()
                     grad_batch = grad_batch - self.scfd_c_i + self.scfd_c
                     self.model = self.assign_grads(self.model, grad_batch)
                     self.scfd_step_cnt += 1
@@ -342,7 +342,7 @@ class SemSegClient():
 
         new_K = (K - rho * (1.0 - pow(rho, K)) / (1.0 - rho)) / (1.0 - rho)
 
-        if self.adaptive_divison:
+        if self.adaptive_division:
             divisor = 1.0 / (new_K * local_lr)
         else:
             divisor = 1.0 / (K * local_lr)

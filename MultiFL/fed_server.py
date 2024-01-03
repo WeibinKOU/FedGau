@@ -77,7 +77,7 @@ class EdgeServer():
             self.clients_v_last = None
 
         if 'SCAFFOLD' == self.config['FedAlgo']:
-            self.sample_ratio = 0.1
+            self.sample_ratio = 1.0
             self.global_c = None
 
     def run(self):
@@ -129,18 +129,17 @@ class EdgeServer():
                 self.clients[i].Qt = Qt[i]
 
         if 'SCAFFOLD' == self.config['FedAlgo']:
-            ud_amt_list = []
-            for i in range(self.clients_num):
-                ud_amt_list.append(self.clients[i].scfd_ud_amt)
-
             with torch.no_grad():
                 if self.global_c is None:
                     self.global_c = self.clients[0].scfd_ud_amt.fill_(0)
-                ud_amt_mean = torch.stack(ud_amt_list).mean(dim=0)
+
+                ud_amt_mean = self.clients[0].scfd_ud_amt.fill_(0)
+                for i in range(0, len(self.clients_dict)):
+                    ud_amt_mean += self.config[self.id]['Agent' + str(i)]['agg_coef'] * self.clients[i].scfd_ud_amt
                 self.global_c += self.sample_ratio * ud_amt_mean
 
-                for i in range(self.clients_num):
-                    self.clients[i].scfd_c = self.global_c
+            for i in range(self.clients_num):
+                self.clients[i].scfd_c = self.global_c
 
         self.avgModel = copy.deepcopy(w_avg)
         self.model.load_state_dict(self.avgModel)
@@ -279,6 +278,8 @@ class CloudServer():
                 print('Dataset %s is not supported!'%self.config['dataset'])
                 exit()
             print('Dataset %s is used!'%self.config['dataset'])
+            print('Model %s is used!'%self.config['model'])
+            print('%s algorithm is used!'%self.config['FedAlgo'])
         elif self.task == 'objDect':
             _, num_classes = get_classes(self.config['classes_path'])
             self.model = self.config['model'](num_classes, self.config['anchors_size']).to(self.dev)
@@ -317,7 +318,6 @@ class CloudServer():
         self.last_perf = 0.0
         self.curr_perf = 0.0
         self.traffic = 0
-
 
     def run(self):
         save_path = self.logdir + '/' + self.task + '/' + self.time_str + '/' + 'checkpoints/'
