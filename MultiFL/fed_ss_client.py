@@ -158,6 +158,7 @@ class SemSegClient():
             self.scfd_rho = self.optim.param_groups[0]['betas'][0]
             self.scfd_lr = self.optim.param_groups[0]['lr']
             self.adaptive_division = False
+            self.dg_model = copy.deepcopy(self.model)
 
         if 'FedNova' == self.config['FedAlgo']:
             rho = self.optim.param_groups[0]['betas'][0]
@@ -174,7 +175,7 @@ class SemSegClient():
                 self.updated_model = None
 
                 if 'MOON' == self.config['FedAlgo'] or 'SCAFFOLD' == self.config['FedAlgo']:
-                    self.dg_model = copy.deepcopy(self.model)
+                    self.dg_model.load_state_dict(self.model.state_dict())
                     self.scfd_step_cnt = 0
 
                 self.prev_grads = None

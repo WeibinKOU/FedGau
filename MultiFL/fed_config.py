@@ -179,7 +179,7 @@ semSeg = {
         'CAI': 2,
         'GPU_ID': 0,
         'enable_optim': False,
-        'FedAlgo': 'FedNova', #Alternatives: FedAvg, FedProx-0.01, FedDyn-0.01, FedProx-0.005, FedDyn-0.005, FedStats, FedCurv-1.0, MOON, SCAFFOLD, FedNova
+        'FedAlgo': 'SCAFFOLD', #Alternatives: FedAvg, FedProx-0.01, FedDyn-0.01, FedProx-0.005, FedDyn-0.005, FedStats, FedCurv-1.0, MOON, SCAFFOLD
         'logdir': '/home/wbkou/AAAI/HFL-DynaCoeffi/logs'
 }
 
