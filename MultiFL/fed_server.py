@@ -80,6 +80,7 @@ class EdgeServer():
             self.sample_ratio = 1.0
             self.global_c = None
 
+
     def run(self):
         for i in range(self.clients_num):
             self.clients[i].train()
@@ -141,7 +142,11 @@ class EdgeServer():
             for i in range(self.clients_num):
                 self.clients[i].scfd_c = self.global_c
 
-        self.avgModel = copy.deepcopy(w_avg)
+        if 'FedNova' == self.config['FedAlgo']:
+            self.avgModel = copy.deepcopy(self.NovaAggregation())
+        else:
+            self.avgModel = copy.deepcopy(w_avg)
+
         self.model.load_state_dict(self.avgModel)
 
         if self.task == 'semSeg':
@@ -248,6 +253,30 @@ class EdgeServer():
         for client in self.clients:
             client.updated_model = copy.deepcopy(self.avgModel)
 
+    #@torch.no_grad()
+    def NovaAggregation(self):
+        c_1, c_2 = 0.0, 0.0
+
+        for i in range(0, len(self.clients_dict)):
+            c_1 += self.config[self.id]['Agent' + str(i)]['agg_coef'] * self.clients[i].nova_step_cnt
+            c_2 += self.config[self.id]['Agent' + str(i)]['agg_coef'] / self.clients[i].nova_step_cnt
+
+        c = 1.0 - c_1 * c_2
+
+        if self.avgModel is None:
+            ag_weights = {key: 0.0 for key in self.clients_dict['Agent0'].keys()}
+        else:
+            ag_weights = copy.deepcopy(self.model.state_dict())
+
+            for k in ag_weights.keys():
+                ag_weights[k] = ag_weights[k] * c
+
+        for k in ag_weights.keys():
+            for i in range(0, len(self.clients_dict)):
+                ag_weights[k] += self.config[self.id]['Agent' + str(i)]['agg_coef'] * c_1 * self.clients_dict['Agent' + str(i)][k] / self.clients[i].nova_step_cnt
+
+        return ag_weights
+
 class CloudServer():
     def __init__(self):
         import MultiFL.fed_config as config
@@ -277,9 +306,9 @@ class CloudServer():
             else:
                 print('Dataset %s is not supported!'%self.config['dataset'])
                 exit()
-            print('Dataset %s is used!'%self.config['dataset'])
-            print('Model %s is used!'%self.config['model'])
-            print('%s algorithm is used!'%self.config['FedAlgo'])
+            print('Dataset: ', self.config['dataset'])
+            print('Model: ', self.config['model'])
+            print('FL algorithm: ', self.config['FedAlgo'])
         elif self.task == 'objDect':
             _, num_classes = get_classes(self.config['classes_path'])
             self.model = self.config['model'](num_classes, self.config['anchors_size']).to(self.dev)

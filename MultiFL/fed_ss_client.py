@@ -66,7 +66,7 @@ class SemSegClient():
         if 'FedAlgo' not in self.config:
             self.mu = 0.0
             self.alpha = 0.0
-        elif self.config['FedAlgo'] == 'FedAvg' or self.config['FedAlgo'] == 'FedStats' or 'FedAvgM' in self.config['FedAlgo'] or self.config['FedAlgo'] == 'FedIR' or 'FedCurv' in self.config['FedAlgo'] or self.config['FedAlgo'] == 'MOON' or self.config['FedAlgo'] == 'SCAFFOLD':
+        elif self.config['FedAlgo'] == 'FedAvg' or self.config['FedAlgo'] == 'FedStats' or 'FedAvgM' in self.config['FedAlgo'] or self.config['FedAlgo'] == 'FedIR' or 'FedCurv' in self.config['FedAlgo'] or self.config['FedAlgo'] == 'MOON' or self.config['FedAlgo'] == 'SCAFFOLD' or self.config['FedAlgo'] == 'FedNova':
             self.mu = 0.0
             self.alpha = 0.0
         elif 'FedProx' in self.config['FedAlgo']:
@@ -75,6 +75,9 @@ class SemSegClient():
         elif 'FedDyn' in self.config['FedAlgo']:
             self.mu = float(self.config['FedAlgo'].split('-')[-1])
             self.alpha = 1.0
+        else:
+            print(colored('Not supported FL algorithm!', 'red'))
+            exit()
 
         self.prev_grads = None
         for param in self.model.parameters():
@@ -156,6 +159,13 @@ class SemSegClient():
             self.scfd_lr = self.optim.param_groups[0]['lr']
             self.adaptive_division = False
 
+        if 'FedNova' == self.config['FedAlgo']:
+            rho = self.optim.param_groups[0]['betas'][0]
+
+            tau = self.config['EAI'] * len(self.dataloader)
+            #self.nova_step_cnt = (tau - rho * (1.0 - pow(rho, tau)) / (1.0 - rho)) / (1.0 - rho)
+            self.nova_step_cnt = tau
+
     def train(self):
         for epoch in range(self.config['EAI']):
             if self.updated_model is not None:
@@ -223,7 +233,6 @@ class SemSegClient():
                     self.scfd_c_i = self.scfd_c_i.to(self.dev)
                     self.scfd_c = self.scfd_c.to(self.dev)
                     grad_batch = self.flatten_grads(self.model).detach().clone()
-                    #self.optim.zero_grad()
                     grad_batch = grad_batch - self.scfd_c_i + self.scfd_c
                     self.model = self.assign_grads(self.model, grad_batch)
                     self.scfd_step_cnt += 1
@@ -268,15 +277,11 @@ class SemSegClient():
                 if 'FedCurv' in self.config['FedAlgo']:
                     self.calc_local_fisher()
 
-
                 if 'MOON' == self.config['FedAlgo']:
                     self.prev_model = copy.deepcopy(self.model)
 
                 if 'SCAFFOLD' == self.config['FedAlgo']:
                     self.update_control_variate()
-                    #print('step counts: ', self.scfd_step_cnt)
-                    #print('c_i: ', self.scfd_c_i)
-                    #print('c_amount: ', self.scfd_ud_amt)
                     self.scfd_step_cnt = 0
 
     def flatten_weights(self, model, numpy_output=True):
