@@ -172,6 +172,34 @@ CamVid_labels = [
     Label(  'ignore'               , 11 ,       11 , 'void'            ,   11     , False        , True         , (  0,  0,142) ),
 ]
 
+CARLA_labels = [
+    #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
+    Label(  'ignore'           ,      0 ,      0   ,   'ignore'         ,    0     , False        , True         , (  0,  0,  0) ),
+    Label(  'building'         ,      1 ,      1   ,   'building'       ,    1     , False        , False        , ( 70, 70, 70) ),
+    Label(  'fence'            ,      2 ,      2   ,   'fence'          ,    2     , False        , False        , (100, 40, 40) ),
+    Label(  'other'            ,      3 ,      3   ,   'other'          ,    3     , False        , False        , ( 55, 90, 80) ),
+    Label(  'pedestrian'       ,      4 ,      4   ,   'pedestrian'     ,    4     , False        , False        , (220, 20, 60) ),
+    Label(  'pole'             ,      5 ,      5   ,   'pole'           ,    5     , False        , False        , (153,153,153) ),
+    Label(  'roadline'         ,      6 ,      6   ,   'roadline'       ,    6     , False        , False        , (157,234, 50) ),
+    Label(  'road'             ,      7 ,      7   ,   'road'           ,    7     , False        , False        , (128, 64,128) ),
+    Label(  'sidewalk'         ,      8 ,      8   ,   'sidewalk'       ,    8     , False        , False        , (244, 35,232) ),
+    Label(  'vegetation'       ,      9 ,      9   ,   'vegetation'     ,    9     , False        , False        , (107,142, 35) ),
+    Label(  'vehicles'         ,     10 ,     10   ,   'vehicles'       ,   10     , False        , False        , (  0,  0,142) ),
+    Label(  'wall'             ,     11 ,     11   ,   'wall'           ,   11     , False        , False        , (102,102,156) ),
+    Label(  'trafficsign'      ,     12 ,     12   ,   'trafficsign'    ,   12     , False        , False        , (220,220,  0) ),
+    Label(  'sky'              ,     13 ,     13   ,   'sky'            ,   13     , False        , False        , ( 70,130,180) ),
+    Label(  'ground'           ,     14 ,     14   ,   'ground'         ,   14     , False        , False        , ( 81,  0, 81) ),
+    Label(  'bridge'           ,     15 ,     15   ,   'bridge'         ,   15     , False        , False        , (150,100,100) ),
+    Label(  'railtrack'        ,     16 ,     16   ,   'railtrack'      ,   16     , False        , False        , (230,150,140) ),
+    Label(  'guardrail'        ,     17 ,     17   ,   'guardrail'      ,   17     , False        , False        , (180,165,180) ),
+    Label(  'trafficlight'     ,     18 ,     18   ,   'trafficlight'   ,   18     , False        , False        , (250,170, 30) ),
+    Label(  'static'           ,     19 ,     19   ,   'static'         ,   19     , False        , False        , (110,190,160) ),
+    Label(  'dynamic'          ,     20 ,     20   ,   'dynamic'        ,   20     , False        , False        , (170,120, 50) ),
+    Label(  'water'            ,     21 ,     21   ,   'water'          ,   21     , False        , False        , ( 45, 60,150) ),
+    Label(  'terrain'          ,     22 ,     22   ,   'terrain'        ,   22     , False        , False        , (145,170,100) ),
+]
+
+
 def generateMatrix(labels):
     category2labels = {}
     evalLabels = []
@@ -279,6 +307,9 @@ def SS_Evaluate(model, dataloader, dev, dataset_name):
     elif dataset_name == 'CamVid':
         cla_names = ['sky', 'building', 'pole', 'road', 'sidewalk', 'tree', 'signsymbol', 'fence', 'car', 'pedestrian', 'bicyclist', 'ignore']
         labels = CamVid_labels
+    elif dataset_name == 'CARLA':
+        cla_names = ['ignore', 'building', 'fence', 'other', 'pedestrian', 'pole', 'roadline', 'road', 'sidewalk', 'vegetation', 'vehicles', 'wall', 'trafficsign', 'sky', 'ground', 'bridge', 'railtrack', 'guardrail', 'trafficlight', 'static', 'dynamic', 'water', 'terrain']
+        labels = CARLA_labels
 
     eval_loss = 0.0
     testdatalen = len(dataloader)

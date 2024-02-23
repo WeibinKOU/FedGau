@@ -52,6 +52,12 @@ class SemSegClient():
             self.criterion = nn.CrossEntropyLoss(ignore_index=11).to(self.dev)
             self.model = self.config['model'](n_classes=12).to(self.dev)
             self.n_classes = 12
+        elif self.config['dataset'] == 'CARLA':
+            self.dataset = Dataset(self.config[self.eid][self.cid]['dataset'], num_classes=23)
+            self.test_dataset = Dataset(self.config['test']['dataset'], num_classes=23, type_='test')
+            self.criterion = nn.CrossEntropyLoss(ignore_index=0).to(self.dev)
+            self.model = self.config['model'](n_classes=23).to(self.dev)
+            self.n_classes = 23
         else:
             print('Dataset %s is not supported!'%self.config['dataset'])
             exit()
