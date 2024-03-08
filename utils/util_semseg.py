@@ -172,32 +172,48 @@ CamVid_labels = [
     Label(  'ignore'               , 11 ,       11 , 'void'            ,   11     , False        , True         , (  0,  0,142) ),
 ]
 
-CARLA_labels = [
+CARLA_labels = [ #3, 14, 15, 16, 17, 19, 20, 21,22 -> 0; 12, 18 -> 9; 6, 7 -> 5; 13 -> 10
     #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
-    Label(  'ignore'           ,      0 ,      0   ,   'ignore'         ,    0     , False        , True         , (  0,  0,  0) ),
-    Label(  'building'         ,      1 ,      1   ,   'building'       ,    1     , False        , False        , ( 70, 70, 70) ),
-    Label(  'fence'            ,      2 ,      2   ,   'fence'          ,    2     , False        , False        , (100, 40, 40) ),
-    Label(  'other'            ,      3 ,      3   ,   'other'          ,    3     , False        , False        , ( 55, 90, 80) ),
-    Label(  'pedestrian'       ,      4 ,      4   ,   'pedestrian'     ,    4     , False        , False        , (220, 20, 60) ),
-    Label(  'pole'             ,      5 ,      5   ,   'pole'           ,    5     , False        , False        , (153,153,153) ),
-    Label(  'roadline'         ,      6 ,      6   ,   'roadline'       ,    6     , False        , False        , (157,234, 50) ),
-    Label(  'road'             ,      7 ,      7   ,   'road'           ,    7     , False        , False        , (128, 64,128) ),
-    Label(  'sidewalk'         ,      8 ,      8   ,   'sidewalk'       ,    8     , False        , False        , (244, 35,232) ),
-    Label(  'vegetation'       ,      9 ,      9   ,   'vegetation'     ,    9     , False        , False        , (107,142, 35) ),
-    Label(  'vehicles'         ,     10 ,     10   ,   'vehicles'       ,   10     , False        , False        , (  0,  0,142) ),
-    Label(  'wall'             ,     11 ,     11   ,   'wall'           ,   11     , False        , False        , (102,102,156) ),
-    Label(  'trafficsign'      ,     12 ,     12   ,   'trafficsign'    ,   12     , False        , False        , (220,220,  0) ),
-    Label(  'sky'              ,     13 ,     13   ,   'sky'            ,   13     , False        , False        , ( 70,130,180) ),
-    Label(  'ground'           ,     14 ,     14   ,   'ground'         ,   14     , False        , False        , ( 81,  0, 81) ),
-    Label(  'bridge'           ,     15 ,     15   ,   'bridge'         ,   15     , False        , False        , (150,100,100) ),
-    Label(  'railtrack'        ,     16 ,     16   ,   'railtrack'      ,   16     , False        , False        , (230,150,140) ),
-    Label(  'guardrail'        ,     17 ,     17   ,   'guardrail'      ,   17     , False        , False        , (180,165,180) ),
-    Label(  'trafficlight'     ,     18 ,     18   ,   'trafficlight'   ,   18     , False        , False        , (250,170, 30) ),
-    Label(  'static'           ,     19 ,     19   ,   'static'         ,   19     , False        , False        , (110,190,160) ),
-    Label(  'dynamic'          ,     20 ,     20   ,   'dynamic'        ,   20     , False        , False        , (170,120, 50) ),
-    Label(  'water'            ,     21 ,     21   ,   'water'          ,   21     , False        , False        , ( 45, 60,150) ),
-    Label(  'terrain'          ,     22 ,     22   ,   'terrain'        ,   22     , False        , False        , (145,170,100) ),
+    Label(  'building'         ,      0 ,        0 ,   'building'       ,    0     , False        , False        , ( 70, 70, 70) ),  # 1     ->    0
+    Label(  'fence'            ,      1 ,        1 ,   'fence'          ,    1     , False        , False        , (100, 40, 40) ),  # 2     ->    1
+    Label(  'pedestrian'       ,      2 ,        2 ,   'pedestrian'     ,    2     , False        , False        , (220, 20, 60) ),  # 4     ->    2
+    Label(  'pole'             ,      3 ,        3 ,   'pole'           ,    3     , False        , False        , (153,153,153) ),  # 5     ->    3
+    Label(  'road'             ,      4 ,        4 ,   'road'           ,    4     , False        , False        , (128, 64,128) ),  # 7, 6  ->    4
+    Label(  'sidewalk'         ,      5 ,        5 ,   'sidewalk'       ,    5     , False        , False        , (244, 35,232) ),  # 8     ->    5
+    Label(  'vegetation'       ,      6 ,        6 ,   'vegetation'     ,    6     , False        , False        , (107,142, 35) ),  # 9     ->    6
+    Label(  'vehicles'         ,      7 ,        7 ,   'vehicles'       ,    7     , False        , False        , (  0,  0,142) ),  #10     ->    7
+    Label(  'wall'             ,      8 ,        8 ,   'wall'           ,    8     , False        , False        , (102,102,156) ),  #11     ->    8
+    Label(  'trafficsign'      ,      9 ,        9 ,   'trafficsign'    ,    9     , False        , False        , (220,220,  0) ),  #12, 18 ->    9
+    Label(  'sky'              ,     10 ,       10 ,   'sky'            ,   10     , False        , False        , ( 70,130,180) ),  #13     ->   10
+    Label(  'ignore'           ,     11 ,       11 ,   'ignore'         ,   11     , False        , True         , (  0,  0,  0) ),  # 0, 3, 14, 15, 16, 17, 19, 20, 21, 22 -> 11
 ]
+
+#CARLA_labels = [
+#    #       name                     id    trainId   category            catId     hasInstances   ignoreInEval   color
+#    Label(  'ignore'           ,      0 ,      0   ,   'ignore'         ,    0     , False        , True         , (  0,  0,  0) ),
+#    Label(  'building'         ,      1 ,      1   ,   'building'       ,    1     , False        , False        , ( 70, 70, 70) ),
+#    Label(  'fence'            ,      2 ,      2   ,   'fence'          ,    2     , False        , False        , (100, 40, 40) ),
+#    Label(  'other'            ,      3 ,      3   ,   'other'          ,    3     , False        , False        , ( 55, 90, 80) ),
+#    Label(  'pedestrian'       ,      4 ,      4   ,   'pedestrian'     ,    4     , False        , False        , (220, 20, 60) ),
+#    Label(  'pole'             ,      5 ,      5   ,   'pole'           ,    5     , False        , False        , (153,153,153) ),
+#    Label(  'roadline'         ,      6 ,      6   ,   'roadline'       ,    6     , False        , False        , (157,234, 50) ),
+#    Label(  'road'             ,      7 ,      7   ,   'road'           ,    7     , False        , False        , (128, 64,128) ),
+#    Label(  'sidewalk'         ,      8 ,      8   ,   'sidewalk'       ,    8     , False        , False        , (244, 35,232) ),
+#    Label(  'vegetation'       ,      9 ,      9   ,   'vegetation'     ,    9     , False        , False        , (107,142, 35) ),
+#    Label(  'vehicles'         ,     10 ,     10   ,   'vehicles'       ,   10     , False        , False        , (  0,  0,142) ),
+#    Label(  'wall'             ,     11 ,     11   ,   'wall'           ,   11     , False        , False        , (102,102,156) ),
+#    Label(  'trafficsign'      ,     12 ,     12   ,   'trafficsign'    ,   12     , False        , False        , (220,220,  0) ),
+#    Label(  'sky'              ,     13 ,     13   ,   'sky'            ,   13     , False        , False        , ( 70,130,180) ),
+#    Label(  'ground'           ,     14 ,     14   ,   'ground'         ,   14     , False        , False        , ( 81,  0, 81) ),
+#    Label(  'bridge'           ,     15 ,     15   ,   'bridge'         ,   15     , False        , False        , (150,100,100) ),
+#    Label(  'railtrack'        ,     16 ,     16   ,   'railtrack'      ,   16     , False        , False        , (230,150,140) ),
+#    Label(  'guardrail'        ,     17 ,     17   ,   'guardrail'      ,   17     , False        , False        , (180,165,180) ),
+#    Label(  'trafficlight'     ,     18 ,     18   ,   'trafficlight'   ,   18     , False        , False        , (250,170, 30) ),
+#    Label(  'static'           ,     19 ,     19   ,   'static'         ,   19     , False        , False        , (110,190,160) ),
+#    Label(  'dynamic'          ,     20 ,     20   ,   'dynamic'        ,   20     , False        , False        , (170,120, 50) ),
+#    Label(  'water'            ,     21 ,     21   ,   'water'          ,   21     , False        , False        , ( 45, 60,150) ),
+#    Label(  'terrain'          ,     22 ,     22   ,   'terrain'        ,   22     , False        , False        , (145,170,100) ),
+#]
 
 
 def generateMatrix(labels):
@@ -298,18 +314,24 @@ def getMetricsAvg(scoreList):
 def SS_Evaluate(model, dataloader, dev, dataset_name):
     model.eval()
     model.aux_mode = 'test'
+    ign_idx = 0 
     if dataset_name == 'cityscapes':
         cla_names = ['road', 'sidewalk', 'building', 'wall', 'fence', 'pole', 'trafficlight', 'trafficsign', 'vegetation', 'terrain', 'sky', 'person', 'rider', 'car', 'truck', 'bus', 'train', 'motorcycle', 'bicycle', 'ignore']
         labels = cityscapes_labels
+        ign_idx = 19
     elif dataset_name == 'Mapillary':
         cla_names = ['Bird', 'Ground Animal', 'Curb', 'Fence', 'Guard Rail', 'Barrier', 'Wall', 'Bike Lane', 'Crosswalk-Plain', 'Curb Cut', 'Parking', 'Pedestrian Area', 'Rail Track', 'Road', 'Service Lane', 'Sidewalk', 'Bridge', 'Building', 'Tunnel', 'Person', 'Bicyclist', 'Motorcyclist', 'Other Rider', 'LaneMarking-Crosswalk', 'LaneMarking-General', 'Mountain', 'Sand', 'Sky', 'Snow', 'Terrain', 'Vegetation', 'Water', 'Banner', 'Bench', 'Bike Rack', 'Billboard', 'Catch Basin', 'CCTV Camera', 'Fire Hydrant', 'Junction Box', 'Mailbox', 'Manhole', 'Phone Booth', 'Pothole', 'Street Light', 'Pole', 'Traffic Sign Frame', 'Utility Pole', 'Traffic Light', 'Traffic Sign (Back)', 'Traffic Sign (Front)', 'Trash Can', 'Bicycle', 'Boat', 'Bus', 'Car', 'Caravan', 'Motorcycle', 'On Rails', 'Other Vehicle', 'Trailer', 'Truck', 'Wheeled Slow', 'Car Mount', 'Ego Vehicle', 'ignore']
         labels = mapillary_labels
+        ign_idx = 65 
     elif dataset_name == 'CamVid':
         cla_names = ['sky', 'building', 'pole', 'road', 'sidewalk', 'tree', 'signsymbol', 'fence', 'car', 'pedestrian', 'bicyclist', 'ignore']
         labels = CamVid_labels
+        ign_idx = 11 
     elif dataset_name == 'CARLA':
-        cla_names = ['ignore', 'building', 'fence', 'other', 'pedestrian', 'pole', 'roadline', 'road', 'sidewalk', 'vegetation', 'vehicles', 'wall', 'trafficsign', 'sky', 'ground', 'bridge', 'railtrack', 'guardrail', 'trafficlight', 'static', 'dynamic', 'water', 'terrain']
+        cla_names = ['building', 'fence', 'pedestrian', 'pole', 'road', 'sidewalk', 'vegetation', 'vehicles', 'wall', 'trafficsign', 'sky', 'ignore']
+        #cla_names = [ 'ignore'         , 'building'       , 'fence'          , 'other'          , 'pedestrian'     , 'pole'           , 'roadline'       , 'road'           , 'sidewalk'       , 'vegetation'     , 'vehicles'       , 'wall'           , 'trafficsign'    , 'sky'            , 'ground'         , 'bridge'         , 'railtrack'      , 'guardrail'      , 'trafficlight'   , 'static'         , 'dynamic'        , 'water'          , 'terrain'        , ]
         labels = CARLA_labels
+        ign_idx = 11 
 
     eval_loss = 0.0
     testdatalen = len(dataloader)
@@ -318,7 +340,7 @@ def SS_Evaluate(model, dataloader, dev, dataset_name):
         nbPixels = 0
         for imgs, masks, names in tqdm(dataloader):
             _masks = F.softmax(model(imgs.to(dev)), dim=1)
-            eval_loss += F.cross_entropy(_masks, masks.to(_masks.device), ignore_index=19)
+            eval_loss += F.cross_entropy(_masks, masks.to(_masks.device), ignore_index=ign_idx)
             max_prob, pred_masks = torch.max(_masks, dim=1)
 
             masks = masks.squeeze().detach().cpu().numpy()

@@ -58,7 +58,7 @@ def build_parser():
     parser.add_argument('--save-epoch', type=int, default=10, metavar='N',
                         help='num of epochs saving the model (default: 10)')
     parser.add_argument("--model", type=str, default='DeepLabv3', help="To specify which model to be trained, options: [CrackNet, BiSeNetV2, SegNet, DeepLabv3]")
-    parser.add_argument("--dataset-path", type=str, default='./datasets/cityspace/centralized/', help="To specify training dataset path")
+    parser.add_argument("--dataset-path", type=str, default='/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Carla/centralized_m/', help="To specify training dataset path")
     #parser.add_argument("--dataset-path", type=str, default='./datasets/cityspace/zurich/', help="To specify training dataset path")
     args = parser.parse_args()
     return args
@@ -110,7 +110,7 @@ if __name__ == "__main__":
         #iaa.Resize({'height': new_height, 'width': new_width}),
     #])
 
-    train_dataset = Dataset(args.dataset_path)
+    train_dataset = Dataset(args.dataset_path, num_classes=12)
 
     dataloader = DataLoader(
         train_dataset,
@@ -118,7 +118,7 @@ if __name__ == "__main__":
         num_workers=1,
         shuffle=True)
 
-    test_dataset = Dataset('./datasets/cityspace/test/', type_='test')
+    test_dataset = Dataset('/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Carla/test_m/', num_classes=12, type_='test')
     #test_dataset = Dataset('./datasets/cityspace/zurich/', type_='test')
     test_dataloader = DataLoader(test_dataset,
                                  batch_size=args.batch_size,
@@ -128,12 +128,12 @@ if __name__ == "__main__":
     model_path = get_dir(tb.logdir, log_name)
 
     device = torch.device('cuda:%d' % (args.gpu) if torch.cuda.is_available() else 'cpu')
-    model = model_sel['model'](n_classes=20)
+    model = model_sel['model'](n_classes=12)
     model = model.to(device)
     model.train()
     optimizer = optim.Adam(model.parameters(), lr=args.lr, betas=(0.9, 0.999), weight_decay=1e-4)
     #criterion = nn.BCELoss()
-    criterion = nn.CrossEntropyLoss(ignore_index=19)
+    criterion = nn.CrossEntropyLoss(ignore_index=0)
 
     for epoch in range(1, args.epochs + 1):
         model.train()
@@ -151,7 +151,7 @@ if __name__ == "__main__":
         #if epoch % 5 != 4:
         #    continue
 
-        clsdicts, catdicts, eval_loss = SS_Evaluate(model, test_dataloader, device)
+        clsdicts, catdicts, eval_loss = SS_Evaluate(model, test_dataloader, device, 'CARLA')
         logger.info("Train epoch: %2d, Train.Loss=%.2f, Eval.Loss=%.2f" % (epoch, loss.avg, eval_loss))
         tb.add_scalar('Train.Loss', loss.avg, epoch)
         tb.add_scalar('Eval.Loss', eval_loss, epoch)

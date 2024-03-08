@@ -40,24 +40,28 @@ class SemSegClient():
             self.criterion = nn.CrossEntropyLoss(ignore_index=19).to(self.dev)
             self.model = self.config['model'](n_classes=20).to(self.dev)
             self.n_classes = 20
+            self.ign_idx = 19 
         elif self.config['dataset'] == 'Mapillary':
             self.dataset = Dataset(self.config[self.eid][self.cid]['dataset'], num_classes=66)
             self.test_dataset = Dataset(self.config['test']['dataset'], num_classes=66, type_='test')
             self.criterion = nn.CrossEntropyLoss(ignore_index=65).to(self.dev)
             self.model = self.config['model'](n_classes=66).to(self.dev)
             self.n_classes = 66
+            self.ign_idx = 65 
         elif self.config['dataset'] == 'CamVid':
             self.dataset = Dataset(self.config[self.eid][self.cid]['dataset'], num_classes=12)
             self.test_dataset = Dataset(self.config['test']['dataset'], num_classes=12, type_='test')
             self.criterion = nn.CrossEntropyLoss(ignore_index=11).to(self.dev)
             self.model = self.config['model'](n_classes=12).to(self.dev)
             self.n_classes = 12
+            self.ign_idx = 11 
         elif self.config['dataset'] == 'CARLA':
-            self.dataset = Dataset(self.config[self.eid][self.cid]['dataset'], num_classes=23)
-            self.test_dataset = Dataset(self.config['test']['dataset'], num_classes=23, type_='test')
-            self.criterion = nn.CrossEntropyLoss(ignore_index=0).to(self.dev)
-            self.model = self.config['model'](n_classes=23).to(self.dev)
-            self.n_classes = 23
+            self.dataset = Dataset(self.config[self.eid][self.cid]['dataset'], num_classes=12)
+            self.test_dataset = Dataset(self.config['test']['dataset'], num_classes=12, type_='test')
+            self.criterion = nn.CrossEntropyLoss(ignore_index=11).to(self.dev)
+            self.model = self.config['model'](n_classes=12).to(self.dev)
+            self.n_classes = 12 
+            self.ign_idx = 11 
         else:
             print('Dataset %s is not supported!'%self.config['dataset'])
             exit()
@@ -143,7 +147,7 @@ class SemSegClient():
                 counts += torch.bincount(masks, minlength=self.n_classes)
 
             weights = counts / total
-            self.criterion = nn.CrossEntropyLoss(weight=weights, ignore_index=self.n_classes - 1).to(self.dev)
+            self.criterion = nn.CrossEntropyLoss(weight=weights, ignore_index=self.ign_idx).to(self.dev)
 
         if 'FedCurv' in self.config['FedAlgo']:
             self.fisher_lambda = float(self.config['FedAlgo'].split('-')[-1])
@@ -152,7 +156,7 @@ class SemSegClient():
             self.is_FedCurv_running = False
 
         if 'MOON' == self.config['FedAlgo']:
-            self.criterion = MOONLoss(ign_idx=self.n_classes - 1).to(self.dev)
+            self.criterion = MOONLoss(ign_idx=self.ign_idx).to(self.dev)
             self.dg_model = copy.deepcopy(self.model)
             self.prev_model = copy.deepcopy(self.model)
 

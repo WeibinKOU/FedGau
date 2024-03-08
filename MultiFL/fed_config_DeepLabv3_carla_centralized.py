@@ -33,9 +33,9 @@ semSeg = {
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/client4/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/client4/',
                 #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/client4/',
-                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Carla/centralized/',
+                'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Carla/centralized_red_12/',
                 'lr': 0.0001,
-                'batch_size': 4,
+                'batch_size': 8,
                 'betas': (0.9, 0.999),
                 'weight_decay': 1e-4,
                 #'agg_coef': 0.535, #cityscapes fedavg
@@ -56,8 +56,8 @@ semSeg = {
             #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/cityspace/test/',
             #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Mapillary/test/',
             #'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/NIID_CamVid/test/',
-            'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Carla/test/',
-            'batch_size': 4,
+            'dataset' : '/home/wbkou/AAAI/HFL-DynaCoeffi/datasets/Carla/test_red_12/',
+            'batch_size': 8,
         },
 
         'model': DeepLabv3,

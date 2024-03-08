@@ -53,7 +53,7 @@ class EdgeServer():
             elif self.config['dataset'] == 'CamVid':
                 self.model = self.config['model'](n_classes=12).to(self.dev)
             elif self.config['dataset'] == 'CARLA':
-                self.model = self.config['model'](n_classes=23).to(self.dev)
+                self.model = self.config['model'](n_classes=12).to(self.dev)
             self.agent = SemSegClient
         elif self.task == 'objDect':
             _, num_classes = get_classes(self.config['classes_path'])
@@ -158,50 +158,50 @@ class EdgeServer():
             elif self.config['dataset'] == 'CamVid':
                 test_dataset = Dataset(self.config['test']['dataset'], num_classes=12, type_='test')
             elif self.config['dataset'] == 'CARLA':
-                test_dataset = Dataset(self.config['test']['dataset'], num_classes=23, type_='test')
+                test_dataset = Dataset(self.config['test']['dataset'], num_classes=12, type_='test')
             test_dataloader = DataLoader(test_dataset,
                                          batch_size=self.config['test']['batch_size'],
                                          shuffle=True,
                                          num_workers=1,
                                          drop_last=True)
 
-            clsdicts, catdicts, self.eval_loss = SS_Evaluate(self.model, test_dataloader, self.dev, self.config['dataset'])
-            self.tb.add_scalar('%s.Eval.Loss' % self.id, self.eval_loss, self.fed_cnt)
+            #clsdicts, catdicts, self.eval_loss = SS_Evaluate(self.model, test_dataloader, self.dev, self.config['dataset'])
+            #self.tb.add_scalar('%s.Eval.Loss' % self.id, self.eval_loss, self.fed_cnt)
 
-            for k, v in clsdicts.items():
-                if k == 'mIoU':
-                    self.tb.add_scalar('%s.Eval.Class.mIoU' % self.id, 100*v, self.fed_cnt)
-                elif k == 'mPrecision':
-                    self.tb.add_scalar('%s.Eval.Class.mPrecision' % self.id, 100*v, self.fed_cnt)
-                elif k == 'mRecall':
-                    self.tb.add_scalar('%s.Eval.Class.mRecall' % self.id, 100*v, self.fed_cnt)
-                elif k == 'mF1':
-                    self.tb.add_scalar('%s.Eval.Class.mF1' % self.id, 100*v, self.fed_cnt)
-                else:
-                    self.tb.add_scalar(self.id + '.Eval.Class.' + k + '.IoU', 100*v['IoU'], self.fed_cnt)
-                    self.tb.add_scalar(self.id + '.Eval.Class.' + k + '.Precision', 100*v['Precision'], self.fed_cnt)
-                    self.tb.add_scalar(self.id + '.Eval.Class.' + k + '.Recall', 100*v['Recall'], self.fed_cnt)
-                    self.tb.add_scalar(self.id + '.Eval.Class.' + k + '.F1', 100*v['F1'], self.fed_cnt)
+            #for k, v in clsdicts.items():
+            #    if k == 'mIoU':
+            #        self.tb.add_scalar('%s.Eval.Class.mIoU' % self.id, 100*v, self.fed_cnt)
+            #    elif k == 'mPrecision':
+            #        self.tb.add_scalar('%s.Eval.Class.mPrecision' % self.id, 100*v, self.fed_cnt)
+            #    elif k == 'mRecall':
+            #        self.tb.add_scalar('%s.Eval.Class.mRecall' % self.id, 100*v, self.fed_cnt)
+            #    elif k == 'mF1':
+            #        self.tb.add_scalar('%s.Eval.Class.mF1' % self.id, 100*v, self.fed_cnt)
+            #    else:
+            #        self.tb.add_scalar(self.id + '.Eval.Class.' + k + '.IoU', 100*v['IoU'], self.fed_cnt)
+            #        self.tb.add_scalar(self.id + '.Eval.Class.' + k + '.Precision', 100*v['Precision'], self.fed_cnt)
+            #        self.tb.add_scalar(self.id + '.Eval.Class.' + k + '.Recall', 100*v['Recall'], self.fed_cnt)
+            #        self.tb.add_scalar(self.id + '.Eval.Class.' + k + '.F1', 100*v['F1'], self.fed_cnt)
 
-            for k, v in catdicts.items():
-                if k == 'mIoU':
-                    self.tb.add_scalar('%s.Eval.Category.mIoU', 100*v, self.fed_cnt)
-                elif k == 'mPrecision':
-                    self.tb.add_scalar('%s.Eval.Category.mPrecision', 100*v, self.fed_cnt)
-                elif k == 'mRecall':
-                    self.tb.add_scalar('%s.Eval.Category.mRecall', 100*v, self.fed_cnt)
-                elif k == 'mF1':
-                    self.tb.add_scalar('%s.Eval.Category.mF1', 100*v, self.fed_cnt)
-                else:
-                    self.tb.add_scalar(self.id + '.Eval.Category.' + k + '.IoU', 100*v['IoU'], self.fed_cnt)
-                    self.tb.add_scalar(self.id + '.Eval.Category.' + k + '.Precision', 100*v['Precision'], self.fed_cnt)
-                    self.tb.add_scalar(self.id + '.Eval.Category.' + k + '.Recall', 100*v['Recall'], self.fed_cnt)
-                    self.tb.add_scalar(self.id + '.Eval.Category.' + k + '.F1', 100*v['F1'], self.fed_cnt)
+            #for k, v in catdicts.items():
+            #    if k == 'mIoU':
+            #        self.tb.add_scalar('%s.Eval.Category.mIoU', 100*v, self.fed_cnt)
+            #    elif k == 'mPrecision':
+            #        self.tb.add_scalar('%s.Eval.Category.mPrecision', 100*v, self.fed_cnt)
+            #    elif k == 'mRecall':
+            #        self.tb.add_scalar('%s.Eval.Category.mRecall', 100*v, self.fed_cnt)
+            #    elif k == 'mF1':
+            #        self.tb.add_scalar('%s.Eval.Category.mF1', 100*v, self.fed_cnt)
+            #    else:
+            #        self.tb.add_scalar(self.id + '.Eval.Category.' + k + '.IoU', 100*v['IoU'], self.fed_cnt)
+            #        self.tb.add_scalar(self.id + '.Eval.Category.' + k + '.Precision', 100*v['Precision'], self.fed_cnt)
+            #        self.tb.add_scalar(self.id + '.Eval.Category.' + k + '.Recall', 100*v['Recall'], self.fed_cnt)
+            #        self.tb.add_scalar(self.id + '.Eval.Category.' + k + '.F1', 100*v['F1'], self.fed_cnt)
 
-            log_cls_info = "[Edge FL: %d] [%s.FL.Eval.Class.mIoU: %.2f%%, %s.FL.Eval.Class.mPrecision: %.2f%%, %s.FL.Eval.Class.mRecall: %.2f%%, %s.FL.Eval.Class.mF1: %.2f%%]" % (self.fed_cnt, self.id, 100*clsdicts['mIoU'], self.id, 100*clsdicts['mPrecision'], self.id, 100*clsdicts['mRecall'], self.id, 100*clsdicts['mF1'])
-            log_cat_info = "[Edge FL: %d] [%s.FL.Eval.Category.mIoU: %.2f%%, %s.FL.Eval.Category.mPrecision: %.2f%%, %s.FL.Eval.Category.mRecall: %.2f%%, %s.FL.Eval.Category.mF1: %.2f%%]" % (self.fed_cnt, self.id, 100*catdicts['mIoU'], self.id, 100*catdicts['mPrecision'], self.id, 100*catdicts['mRecall'], self.id, 100*catdicts['mF1'])
-            print(log_cls_info)
-            print(log_cat_info)
+            #log_cls_info = "[Edge FL: %d] [%s.FL.Eval.Class.mIoU: %.2f%%, %s.FL.Eval.Class.mPrecision: %.2f%%, %s.FL.Eval.Class.mRecall: %.2f%%, %s.FL.Eval.Class.mF1: %.2f%%]" % (self.fed_cnt, self.id, 100*clsdicts['mIoU'], self.id, 100*clsdicts['mPrecision'], self.id, 100*clsdicts['mRecall'], self.id, 100*clsdicts['mF1'])
+            #log_cat_info = "[Edge FL: %d] [%s.FL.Eval.Category.mIoU: %.2f%%, %s.FL.Eval.Category.mPrecision: %.2f%%, %s.FL.Eval.Category.mRecall: %.2f%%, %s.FL.Eval.Category.mF1: %.2f%%]" % (self.fed_cnt, self.id, 100*catdicts['mIoU'], self.id, 100*catdicts['mPrecision'], self.id, 100*catdicts['mRecall'], self.id, 100*catdicts['mF1'])
+            #print(log_cls_info)
+            #print(log_cat_info)
 
             aggted_loss = sum([self.config[self.id]['Agent' + str(i)]['agg_coef'] * self.clients[i].eval_loss for i in range(len(self.clients))])
             self.delta_e = sum([self.config[self.id]['Agent' + str(i)]['agg_coef'] * self.clients[i].delta_ce for i in range(len(self.clients))])
@@ -307,7 +307,7 @@ class CloudServer():
             elif self.config['dataset'] == 'CamVid':
                 self.model = self.config['model'](n_classes=12).to(self.dev)
             elif self.config['dataset'] == 'CARLA':
-                self.model = self.config['model'](n_classes=23).to(self.dev)
+                self.model = self.config['model'](n_classes=12).to(self.dev)
             else:
                 print('Dataset %s is not supported!'%self.config['dataset'])
                 exit()
@@ -355,8 +355,10 @@ class CloudServer():
 
         for edge in self.edges:
             edge.model.load_state_dict(self.model.state_dict())
+            #edge.model.load_state_dict(torch.load('/home/wbkou/AAAI/HFL-DynaCoeffi/logs/semSeg/2024_02_28_22_59_59_DeepLabv3_centralized_carla/checkpoints/Cloud_FL_229_model.pth', map_location=self.dev))
             for client in edge.clients:
                 client.model.load_state_dict(self.model.state_dict())
+                #edge.model.load_state_dict(torch.load('/home/wbkou/AAAI/HFL-DynaCoeffi/logs/semSeg/2024_02_28_22_59_59_DeepLabv3_centralized_carla/checkpoints/Cloud_FL_229_model.pth', map_location=self.dev))
 
     def run(self):
         save_path = self.logdir + '/' + self.task + '/' + self.time_str + '/' + 'checkpoints/'
@@ -425,7 +427,7 @@ class CloudServer():
             elif self.config['dataset'] == 'CamVid':
                 test_dataset = Dataset(self.config['test']['dataset'], num_classes=12, type_='test')
             elif self.config['dataset'] == 'CARLA':
-                test_dataset = Dataset(self.config['test']['dataset'], num_classes=23, type_='test')
+                test_dataset = Dataset(self.config['test']['dataset'], num_classes=12, type_='test')
 
             test_dataloader = DataLoader(test_dataset,
                                          batch_size=self.config['test']['batch_size'],
@@ -471,59 +473,59 @@ class CloudServer():
             print(log_cls_info)
             print(log_cat_info)
 
-            traffic = 2 * (self.config['CAI'] * sum([len(edge.clients) for edge in self.edges]) + len(self.edges))
-            self.traffic += traffic
-            self.tb.add_scalar('Cloud.Traffic', self.traffic, self.fed_cnt)
-            if self.last_perf > 0:
-                self.curr_cq = (self.curr_perf - self.last_perf) / (traffic + 1e-6) if self.curr_perf - self.last_perf > 0 else 0
-                self.cq.append(self.curr_cq)
+            #traffic = 2 * (self.config['CAI'] * sum([len(edge.clients) for edge in self.edges]) + len(self.edges))
+            #self.traffic += traffic
+            #self.tb.add_scalar('Cloud.Traffic', self.traffic, self.fed_cnt)
+            #if self.last_perf > 0:
+            #    self.curr_cq = (self.curr_perf - self.last_perf) / (traffic + 1e-6) if self.curr_perf - self.last_perf > 0 else 0
+            #    self.cq.append(self.curr_cq)
 
-            self.hetero_eg = eval_loss - sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].eval_loss for i in range(len(self.edges)))
-            self.hetero_eg = self.hetero_eg.item()
-            self.hetero_ce = sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].eval_loss_diff for i in range(len(self.edges)))
-            self.hetero_ce = self.hetero_ce.item()
-            self.delta = sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].delta_e for i in range(len(self.edges)))
-            self.rho = sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].rho for i in range(len(self.edges)))
-            self.beta = sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].beta for i in range(len(self.edges)))
-            self.grad = sum([self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].grad for i in range(len(self.edges))], torch.zeros_like(self.edges[0].grad))
-            self.grad = self.grad.norm(2).item()
-            optim_theta = self.curr_cq / (max(self.cq) + 1e-6) if self.last_perf > 0 else 1.0
+            #self.hetero_eg = eval_loss - sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].eval_loss for i in range(len(self.edges)))
+            #self.hetero_eg = self.hetero_eg.item()
+            #self.hetero_ce = sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].eval_loss_diff for i in range(len(self.edges)))
+            #self.hetero_ce = self.hetero_ce.item()
+            #self.delta = sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].delta_e for i in range(len(self.edges)))
+            #self.rho = sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].rho for i in range(len(self.edges)))
+            #self.beta = sum(self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].beta for i in range(len(self.edges)))
+            #self.grad = sum([self.config['Edge' + str(i)]['agg_coef'] * self.edges[i].grad for i in range(len(self.edges))], torch.zeros_like(self.edges[0].grad))
+            #self.grad = self.grad.norm(2).item()
+            #optim_theta = self.curr_cq / (max(self.cq) + 1e-6) if self.last_perf > 0 else 1.0
 
 
-            self.tb.add_scalar('Cloud.Optim.Hetero_EG', self.hetero_eg, self.fed_cnt)
-            self.tb.add_scalar('Cloud.Optim.Hetero_CE', self.hetero_ce, self.fed_cnt)
-            self.tb.add_scalar('Cloud.Optim.AdaptiveFactor', optim_theta, self.fed_cnt)
-            self.tb.add_scalar('Cloud.Optim.GradDelta', self.delta, self.fed_cnt)
-            self.tb.add_scalar('Cloud.Optim.GradNorm', np.sqrt(self.grad), self.fed_cnt)
-            self.tb.add_scalar('Cloud.Optim.Rho', self.rho, self.fed_cnt)
-            self.tb.add_scalar('Cloud.Optim.Beta', self.beta, self.fed_cnt)
+            #self.tb.add_scalar('Cloud.Optim.Hetero_EG', self.hetero_eg, self.fed_cnt)
+            #self.tb.add_scalar('Cloud.Optim.Hetero_CE', self.hetero_ce, self.fed_cnt)
+            #self.tb.add_scalar('Cloud.Optim.AdaptiveFactor', optim_theta, self.fed_cnt)
+            #self.tb.add_scalar('Cloud.Optim.GradDelta', self.delta, self.fed_cnt)
+            #self.tb.add_scalar('Cloud.Optim.GradNorm', np.sqrt(self.grad), self.fed_cnt)
+            #self.tb.add_scalar('Cloud.Optim.Rho', self.rho, self.fed_cnt)
+            #self.tb.add_scalar('Cloud.Optim.Beta', self.beta, self.fed_cnt)
 
-            self.optimizer.theta = optim_theta
-            self.optimizer.beta = self.beta
-            self.optimizer.rho = self.rho
-            self.optimizer.delta = self.delta
-            self.optimizer.delta_e.clear()
-            for i in range(len(self.edges)):
-                self.optimizer.delta_e.append(self.edges[i].delta_e)
-            self.optimizer.grad_norm2.append(self.grad)
-            estiC = 0.0
-            if 'enable_optim' in self.config and self.config['enable_optim']:
-                eai, cai, estiC = self.optimizer.solve()
-                print('Optimized Result (EAI, CAI):', eai, cai)
-                self.config['EAI'] = eai
-                self.config['CAI'] = cai
-                for edge in self.edges:
-                    edge.config['EAI'] = eai
-                    edge.config['CAI'] = cai
-                    for client in edge.clients:
-                        client.config['EAI'] = eai
-                        client.config['CAI'] = cai
+            #self.optimizer.theta = optim_theta
+            #self.optimizer.beta = self.beta
+            #self.optimizer.rho = self.rho
+            #self.optimizer.delta = self.delta
+            #self.optimizer.delta_e.clear()
+            #for i in range(len(self.edges)):
+            #    self.optimizer.delta_e.append(self.edges[i].delta_e)
+            #self.optimizer.grad_norm2.append(self.grad)
+            #estiC = 0.0
+            #if 'enable_optim' in self.config and self.config['enable_optim']:
+            #    eai, cai, estiC = self.optimizer.solve()
+            #    print('Optimized Result (EAI, CAI):', eai, cai)
+            #    self.config['EAI'] = eai
+            #    self.config['CAI'] = cai
+            #    for edge in self.edges:
+            #        edge.config['EAI'] = eai
+            #        edge.config['CAI'] = cai
+            #        for client in edge.clients:
+            #            client.config['EAI'] = eai
+            #            client.config['CAI'] = cai
 
-            self.tb.add_scalar('Cloud.Optim.EstimC', estiC, self.fed_cnt)
-            self.tb.add_scalar('Cloud.Optim.EAI', self.config['EAI'], self.fed_cnt)
-            self.tb.add_scalar('Cloud.Optim.CAI', self.config['CAI'], self.fed_cnt)
+            #self.tb.add_scalar('Cloud.Optim.EstimC', estiC, self.fed_cnt)
+            #self.tb.add_scalar('Cloud.Optim.EAI', self.config['EAI'], self.fed_cnt)
+            #self.tb.add_scalar('Cloud.Optim.CAI', self.config['CAI'], self.fed_cnt)
 
-            self.last_perf = self.curr_perf
+            #self.last_perf = self.curr_perf
         elif self.task == 'objDect':
             num_val = 0
             val_lines = None

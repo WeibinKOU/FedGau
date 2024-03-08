@@ -7,6 +7,7 @@ class ResNet_50(nn.Module):
     def __init__(self, in_channels = 3, conv1_out = 64):
         super(ResNet_50, self).__init__()
         self.resnet_50 = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
+        #self.resnet_50 = models.resnet152(weights=models.ResNet152_Weights.DEFAULT)
         self.relu = nn.ReLU(inplace=True)
   
     def forward(self, x):
